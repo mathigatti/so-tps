@@ -7,6 +7,7 @@ MAIN=simusched
 GRAPH=graphsched.py
 HERE=./
 FCFS=SchedFCFS
+RR=SchedRR
 OUT_FOLDER=out/$@
 TASKS_FOLDER=tasks/$@
 
@@ -26,6 +27,15 @@ ejercicio2: $(MAIN)
 	$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 2 5 $(FCFS) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2_core.png
 	$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 3 2 5 $(FCFS) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-4_core.png
 
+ejercicio3: $(MAIN)
+	mkdir -p $(OUT_FOLDER)
+	$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 2 5 $(FCFS) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2_core.png
+	$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 3 2 5 $(FCFS) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-4_core.png
+
+ejercicio4: $(MAIN)
+		mkdir -p $(OUT_FOLDER)
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 2 5 $(RR) 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 2 5 $(RR) 5 2 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
 %.o: %.cpp %.h basesched.h
 basesched.o: basesched.cpp basesched.h

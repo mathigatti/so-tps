@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <queue>
+#include <list>
 #include "basesched.h"
 
 class SchedRR : public SchedBase {
@@ -14,7 +15,12 @@ class SchedRR : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 
 	private:
-		// Completar
+		std::list<int> cola_ready;
+		std::vector<int> cpu_quantum;
+		std::vector<int> quantums_restantes;
+		int next(int cpu);
+		void reset_quantum(int cpu);
+		int get_next_from_queue();
 };
 
 #endif
