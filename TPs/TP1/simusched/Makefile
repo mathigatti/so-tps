@@ -2,7 +2,7 @@ export LC_ALL=C
 CXXFLAGS= -Wall -pedantic -g -ggdb
 LDFLAGS= -lpthread
 
-OBJS=main.o simu.o basesched.o basetask.o tasks.o sched_fcfs.o sched_rr.o
+OBJS=main.o simu.o basesched.o basetask.o tasks.o sched_fcfs.o sched_rr.o sched_no_mistery.o
 MAIN=simusched
 GRAPH=graphsched.py
 HERE=./
@@ -37,10 +37,23 @@ ejercicio4: $(MAIN)
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 2 5 $(RR) 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 2 5 $(RR) 5 2 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
+
+ejercicio5: $(MAIN)
+		mkdir -p $(OUT_FOLDER)
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-3.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-3.png
+
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-4.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-5.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-3.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-6.png
+
+
+
 %.o: %.cpp %.h basesched.h
 basesched.o: basesched.cpp basesched.h
 basetask.o: basetask.cpp basetask.h
-main.o: main.cpp simu.h basetask.h basesched.h tasks.h sched_fcfs.h sched_rr.h
+main.o: main.cpp simu.h basetask.h basesched.h tasks.h sched_fcfs.h sched_rr.h sched_no_mistery.h
 simu.o: simu.cpp simu.h basetask.h basesched.h
 simusched.o: simusched.cpp basetask.h basesched.h tasks.h
 tasks.o: tasks.cpp tasks.h basetask.h
