@@ -4,9 +4,11 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+
 #include "basesched.h"
 
 using namespace std;
+
 
 class SchedMistery : public SchedBase {
 	public:
@@ -17,7 +19,10 @@ class SchedMistery : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 
 	private:
-		// Completar
+		// INCOMPLETO
+
 };
+
+
 
 #endif

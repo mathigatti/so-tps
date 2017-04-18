@@ -15,10 +15,11 @@ SchedNoMistery::~SchedNoMistery() {
 
 }
 
-
 void SchedNoMistery::load(int pid) {
+
 	q.push(pid); // llegó una tarea nueva
-//	cerr << "Cargando tarea de primer parametro " << (*tsk_params(pid))[0];
+	cerr << "Cargando pid " << pid << " - largo: " << (*tsk_params(pid))[0] << endl;
+
 }
 
 void SchedNoMistery::unblock(int pid) {

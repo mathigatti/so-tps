@@ -34,21 +34,25 @@ ejercicio3: $(MAIN)
 
 ejercicio4: $(MAIN)
 		mkdir -p $(OUT_FOLDER)
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 2 5 $(RR) 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 2 5 $(RR) 1 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 2 5 $(RR) 5 2 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
 
 ejercicio5: $(MAIN)
 		mkdir -p $(OUT_FOLDER)
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-3.tsk 1 0 0 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-3.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 2 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-4.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-5.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-3.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-6.png
+ejercicio7: $(MAIN)
+		mkdir -p $(OUT_FOLDER)
 
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 $(RR) 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-rr-core1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-mistery-core1.png
+		# FALTA AGREGAR PSJF
 
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 $(RR) 5 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-rr-core2.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-mistery-core2.png
+		# FALTA AGREGAR PSJF
 
 %.o: %.cpp %.h basesched.h
 basesched.o: basesched.cpp basesched.h
