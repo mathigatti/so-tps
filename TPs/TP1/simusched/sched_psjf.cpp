@@ -10,8 +10,8 @@ using namespace std;
 SchedPSJF::SchedPSJF(vector<int> argn) {
 	// Inicializo la estructura de task en ready
 	for(int i=0; i<5; i++){
-		std::priority_queue<int, std::vector<int>, PSJF> queue;
-		queues.push_back(queue);
+		pqueue pq;
+		qs.push_back(pq);
 	}
 }
 
@@ -21,8 +21,8 @@ SchedPSJF::~SchedPSJF() {
 
 void SchedPSJF::load(int pid) {
 	/** llego una tarea nueva -> chequeo su prioridad e inserto en la queue correspondiente **/
-	int prioridad = prioridad(pid);
-	queues[prioridad-1].push(pid);
+	int pr = prioridad(pid);
+	qs[pr-1].push(pid);
 }
 
 void SchedPSJF::unblock(int pid) {
@@ -52,31 +52,25 @@ int SchedPSJF::tick(int cpu, const enum Motivo m) {
 	}
 }
 
-/** Devuelve la prioridad de la tarea del argumento (1 a 5) **/
-int prioridad(int pid){
-	vector<int>* v_pid = tsk_params(pid);
-	return v_pid[0];
-}
-
 /** Retorna el pid de la tarea mas prioritaria en espera **/
 int sig(){
-	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las queues (0>>4)
-		if (!queues[i].empty()){
-			return queues[i].top();
+	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las qs (0>>4)
+		if (!qs[i].empty()){
+			return qs[i].top();
 		}
 	}
 
 	return IDLE_TASK; 	// De no haber retorna IDLE
 }
 
-/** Retorna el pid de la tarea mas prioritaria en espera, eliminandola de las queues de ready **/
+/** Retorna el pid de la tarea mas prioritaria en espera, eliminandola de las qs de ready **/
 int siggyPop(){
 
 	int siggy(IDLE_TASK);
-	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las queues (0>>4)
-		if (!queues[i].empty()){
-			siggy = queues[i].top();
-			queues[i].pop();
+	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las qs (0>>4)
+		if (!qs[i].empty()){
+			siggy = qs[i].top();
+			qs[i].pop();
 			return siggy;
 		}
 	}
@@ -84,9 +78,15 @@ int siggyPop(){
 	return siggy;	// De no haber retorna IDLE
 }
 
+/** Devuelve la prioridad de la tarea del argumento (1 a 5) **/
+int prioridad(int pid) {
+	vector<int>* v_pid = tsk_params(pid);
+	return (*v_pid)[0];
+}
+
 /**
- *	Define el proceso a correr entre los dados. Quita de espera al que corre y deja al otro en queues
- *	Retorna el proceso más prioritario, que queda fuera de la estructura de queues de procesos en ready
+ *	Define el proceso a correr entre los dados. Quita de espera al que corre y deja al otro en qs
+ *	Retorna el proceso más prioritario, que queda fuera de la estructura de qs de procesos en ready
  *	Ademas, deja en ready al proceso de menor prioridad segun corresponda
  **/
 int dameLaPosta(int pidActual, int pidPrioritaria){
@@ -94,10 +94,10 @@ int dameLaPosta(int pidActual, int pidPrioritaria){
 	vector<int>* v_act = tsk_params(pidActual);
 	vector<int>* v_pri = tsk_params(pidPrioritaria);
 
-	int prioridad_actual = v_act[0];
-	int prioridad_prioritaria = v_pri[0];
-	int tiempos_actual = v_act[1];
-	int tiempos_prioritaria = v_pri[1];
+	int prioridad_actual = (*v_act)[0];
+	int prioridad_prioritaria = (*v_pri)[0];
+	int tiempos_actual = (*v_act)[1];
+	int tiempos_prioritaria = (*v_pri)[1];
 
 	int pidWinner = pidActual;	// Si pidWinner es el actual, sigue corriendo y nada hay que hacer
 
@@ -108,10 +108,10 @@ int dameLaPosta(int pidActual, int pidPrioritaria){
 		pidWinner = pidPrioritaria;
 
 		// Desalojo de ready
-		queues[prioridad_prioritaria-1].pop();
+		qs[prioridad_prioritaria-1].pop();
 
 		// Guardo el anterior
-		queues[prioridad_actual-1].push(pidActual);
+		qs[prioridad_actual-1].push(pidActual);
 	}
 
 	return pidWinner;
