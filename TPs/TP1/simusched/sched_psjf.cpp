@@ -53,9 +53,9 @@ int SchedPSJF::tick(int cpu, const enum Motivo m) {
 }
 
 /** Retorna el pid de la tarea mas prioritaria en espera **/
-int sig(){
+int SchedPSJF::sig(){
 	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las qs (0>>4)
-		if (!qs[i].empty()){
+		if (!(qs[i].empty())){
 			return qs[i].top();
 		}
 	}
@@ -64,7 +64,7 @@ int sig(){
 }
 
 /** Retorna el pid de la tarea mas prioritaria en espera, eliminandola de las qs de ready **/
-int siggyPop(){
+int SchedPSJF::siggyPop(){
 
 	int siggy(IDLE_TASK);
 	for (int i = 0; i < 5; i++){	// Recorro de mayor prioridad a menor las qs (0>>4)
@@ -79,7 +79,7 @@ int siggyPop(){
 }
 
 /** Devuelve la prioridad de la tarea del argumento (1 a 5) **/
-int prioridad(int pid) {
+int SchedPSJF::prioridad(int pid) {
 	vector<int>* v_pid = tsk_params(pid);
 	return (*v_pid)[0];
 }
@@ -89,7 +89,7 @@ int prioridad(int pid) {
  *	Retorna el proceso más prioritario, que queda fuera de la estructura de qs de procesos en ready
  *	Ademas, deja en ready al proceso de menor prioridad segun corresponda
  **/
-int dameLaPosta(int pidActual, int pidPrioritaria){
+int SchedPSJF::dameLaPosta(int pidActual, int pidPrioritaria){
 	/** tsk_params -> params[0]==prioridad | params[1]==tiempo_cpu **/
 	vector<int>* v_act = tsk_params(pidActual);
 	vector<int>* v_pri = tsk_params(pidPrioritaria);

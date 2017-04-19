@@ -45,8 +45,8 @@ ejercicio5: $(MAIN)
 
 ejercicio6: $(MAIN)
 		mkdir -p $(OUT_FOLDER)
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 2 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
 ejercicio7: $(MAIN)
 		mkdir -p $(OUT_FOLDER)
