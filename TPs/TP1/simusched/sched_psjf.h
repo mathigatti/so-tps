@@ -16,10 +16,13 @@ struct PSJF {
 		vector<int>* v1 = tsk_params(pid1);
 		vector<int>* v2 = tsk_params(pid2);
 
-		return v1[1] > v2[1]; 	// La queue da mayor prioridad a los tiempos mas chicos
+		return (*v1)[1] > (*v2)[1]; 	// La queue da mayor prioridad a los tiempos mas chicos
 	};
 
 };
+
+typedef std::priority_queue<int, std::vector<int>, PSJF > pqueue;
+typedef std::vector<pqueue> pvector;
 
 class SchedPSJF : public SchedBase {
 	public:
@@ -30,7 +33,7 @@ class SchedPSJF : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 
 	private:
-		std::vector<std::priority_queue<int, std::vector<int>, PSJF>> queues;
+		pvector qs;
 		int sig(); 					// Retorna el pid de la tarea mas prioritaria en espera
 		int siggyPop(); 			// Retorna el pid de la tarea mas prioritaria en ready para correrla (la elimina de la espera)
 		int prioridad(int pid);		// Devuelve la prioridad de la tarea del argumento (1 a 5)
