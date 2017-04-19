@@ -53,11 +53,11 @@ ejercicio7: $(MAIN)
 
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 $(RR) 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-rr-core1.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-mistery-core1.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-psjf-core1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@_priority.tsk 1 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-psjf-core1.png
 
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 $(RR) 5 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-rr-core2.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-mistery-core2.png
-		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-psjf-core2.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@_priority.tsk 2 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-psjf-core2.png
 
 %.o: %.cpp %.h basesched.h
 basesched.o: basesched.cpp basesched.h
