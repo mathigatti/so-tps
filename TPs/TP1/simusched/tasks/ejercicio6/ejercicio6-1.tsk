@@ -1,0 +1,11 @@
+# Ejecuto 1er tarea de 8ms con prioridad media
+TaskPriorizada 3 8
+# A los 3ms cargo 2da tarea, que quedara esperando, pues tiene prioridad minima
+@3:
+TaskPriorizada 5 3
+# A los 5ms cargo 3er tarea, que ejecuta por tener misma prioridad y menor tiempo de cpu total que la 1era
+@5:
+TaskPriorizada 3 5
+# A los 7ms cargo ultima tarea, que ejecuta por prioridad maxima
+@7:
+TaskPriorizada 1 4
