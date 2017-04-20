@@ -102,7 +102,7 @@ int SchedPSJF::dameLaPosta(int pidActual, int pidPrioritaria){
 	int pidWinner = pidActual;	// Si pidWinner es el actual, sigue corriendo y nada hay que hacer
 
 	/** Si en cambio el pidWinner es la tarea prioritaria en ready, hay que desalojarla y guardar al pidActual para una futura ejecucion **/
-	if(prioridad_actual < prioridad_prioritaria || (prioridad_actual == prioridad_prioritaria && tiempos_actual > tiempos_prioritaria)){
+	if(prioridad_actual > prioridad_prioritaria || (prioridad_actual == prioridad_prioritaria && tiempos_actual > tiempos_prioritaria)){
 		
 		// Actualizo el nuevo pid
 		pidWinner = pidPrioritaria;
