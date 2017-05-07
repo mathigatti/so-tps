@@ -26,10 +26,7 @@ void TaskConsola(int pid, vector<int> params) { // params: n, bmin, bmax
 	int bmin = params[1];
 	int bmax = params[2];
 
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-
-	srand((time_t)ts.tv_nsec);
+	srand(1000);
 
 	for(int i = 0; i < n; i++) {
 		uso_IO(pid, bmin + rand() % (bmax - bmin + 1));
