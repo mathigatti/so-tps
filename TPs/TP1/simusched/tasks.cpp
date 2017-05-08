@@ -26,10 +26,7 @@ void TaskConsola(int pid, vector<int> params) { // params: n, bmin, bmax
 	int bmin = params[1];
 	int bmax = params[2];
 
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-
-	srand((time_t)ts.tv_nsec);
+	srand(1000);
 
 	for(int i = 0; i < n; i++) {
 		uso_IO(pid, bmin + rand() % (bmax - bmin + 1));
@@ -47,9 +44,12 @@ void TaskPajarillo(int pid, vector<int> params) { // params: cantidad_de_repetic
 		uso_IO(pid, tiempo_bloqueo);
 
 	}
-
-
 }
+
+void TaskPriorizada(int pid, vector<int> params) { // params: prioridad, n
+	uso_CPU(pid, params[1]);	// Uso el CPU n milisegundos.
+}
+
 
 void tasks_init(void) {
 	/* Todos los tipos de tareas se deben registrar acá para poder ser usadas.
@@ -60,4 +60,5 @@ void tasks_init(void) {
 	register_task(TaskAlterno, -1);
 	register_task(TaskConsola, 3);
 	register_task(TaskPajarillo, 3);
+	register_task(TaskPriorizada, 2);
 }
