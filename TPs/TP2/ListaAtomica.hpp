@@ -27,11 +27,10 @@ public:
 	}
 
 	void push_front(const T& val) {
-		Nodo* aux = _head.load();
 		Nodo* nodo = (Nodo*) malloc(sizeof(Nodo));
+		Nodo* aux = _head.exchange(nodo);
 		nodo->_next = aux;
 		nodo->_val = val;
-		_head.store(nodo);
 	}
 
 	T& front() const {

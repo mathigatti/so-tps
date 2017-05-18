@@ -6,8 +6,8 @@ using namespace std;
 
 int main(void) {
 	Lista<int> listaAtomica;
-	listaAtomica.push_front(1);
 
+	listaAtomica.push_front(1);
 	printf("TESTEANDO...\n");
 	assert(listaAtomica.front() == 1);
 	listaAtomica.push_front(2);
