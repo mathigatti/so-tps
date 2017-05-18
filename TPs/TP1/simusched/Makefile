@@ -40,6 +40,20 @@ ejercicio4: $(MAIN)
 
 ejercicio5: $(MAIN)
 		mkdir -p $(OUT_FOLDER)
+<<<<<<< HEAD
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 0 0 SchedMistery 0 0 0 0 0 1 1 0 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 0 0 SchedMistery 1 1 1 1 1 1 1 4 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
+		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 1 0 0 SchedMistery 1 1 1 1 1 1 1 4 1 1 1 1 1 1 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
+
+# ./simusched <lote.tsk> <num_cores> <costo_cs> <costo_mi> <sched> [<params_sched>]
+
+# <lote.tsk> es el archivo que especifica el lote de tareas a simular.
+# <num cores> es la cantidad de nucleos de procesamiento.
+# <costo cs> es el costo de cambiar de contexto.
+# <costo mi> es el costo de cambiar un proceso de nucleo de procesamiento.
+# <sched> es el nombre de la clase de scheduler a utilizar (ej. SchedFCFS).
+# <params sched> es una lista de cero o mas parametros para el scheduler.
+=======
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-1.tsk 1 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-1.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@-2.tsk 2 0 0 SchedNoMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-2.png
 
@@ -58,6 +72,7 @@ ejercicio7: $(MAIN)
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 $(RR) 5 5 | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-rr-core2.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@.tsk 2 1 1 SchedMistery | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-mistery-core2.png
 		$(HERE)$(MAIN) $(TASKS_FOLDER)/$@_priority.tsk 2 1 1 $(PSJF) | $(HERE)$(GRAPH) > $(OUT_FOLDER)/$@-psjf-core2.png
+>>>>>>> f629b2ba59aff9fd761676885d3a724c60a90770
 
 %.o: %.cpp %.h basesched.h
 basesched.o: basesched.cpp basesched.h
