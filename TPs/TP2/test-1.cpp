@@ -25,7 +25,6 @@ int main(void) {
 	h.addAndInc("casa");
 	assert(h.member("casa")==true);
 	assert(h.member("perro")==false);
-
 	pair<string, unsigned int> maximo = h.maximum(1);
 	assert(maximo.first=="casa");
 	assert(maximo.second==1);

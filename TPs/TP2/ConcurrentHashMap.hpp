@@ -14,12 +14,15 @@ class ConcurrentHashMap {
 
     /*
     ConcurrentHashMap(): Constructor. Crea la tabla. La misma tendrá 26 entradas (una por
-    cada letra del abecedario 1 ). Cada entrada consta de una lista de pares (string, entero). La
+    cada letra del abecedario). Cada entrada consta de una lista de pares (string, entero). La
     función de hash será la primer letra del string.
     */
 
     ConcurrentHashMap(){
-        tabla = (Lista<pair<string, unsigned int> >*) malloc(CANT_ENTRADAS*sizeof(Lista<pair<string, unsigned int> >));
+        tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
+        for(int i = 0; i < CANT_ENTRADAS; ++i){
+          tabla[i] = new Lista<pair<string, unsigned int> >;
+        }
     }
 
     /*
@@ -29,16 +32,16 @@ class ConcurrentHashMap {
     */
 
     void addAndInc(string key){
-        int index = toInt(key[0]);
-        for (auto it = tabla[index].CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+        int index = fHash(key[0]);
+        for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
             auto t = it.Siguiente();
             if(t.first == key){
                 pair<string, unsigned int> newValue = make_pair(key,t.second + 1);
-                tabla[index].update(t,newValue);
+                tabla[index]->update(t,newValue);
             }
         }        
         pair<string, unsigned int> value = make_pair(key,1);
-        tabla[index].push_front(value);
+        tabla[index]->push_front(value);
     }
 
     /*
@@ -47,8 +50,8 @@ class ConcurrentHashMap {
     */
 
     bool member(string key){
-        int index = toInt(key[0]);
-        for (auto it = tabla[index].CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+        int index = fHash(key[0]);
+        for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
             auto t = it.Siguiente();
             if(t.first == key){
                 return true;
@@ -68,7 +71,7 @@ class ConcurrentHashMap {
     pair<string, unsigned int> maximum(unsigned int nt){
         pair<string, unsigned int> maximo = make_pair("Tabla vacia",0);
         for (int i = 0; i < 26; i++) {
-            for (auto it = tabla[i].CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+            for (auto it = tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
                 auto t = it.Siguiente();
                 if(maximo.second < t.second){
                     maximo = t;
@@ -78,12 +81,12 @@ class ConcurrentHashMap {
         return maximo;
     }
 
-    Lista<pair<string, unsigned int> > *tabla;
+    Lista<pair<string, unsigned int> > **tabla;
 
    protected:
 
 
-    int toInt(char x){
+    int fHash(char x){
         return (int)x - 97;
     }
 
