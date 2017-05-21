@@ -25,6 +25,14 @@ class ConcurrentHashMap {
         }
     }
 
+    ~ConcurrentHashMap() {
+        for(int i = 0; i < CANT_ENTRADAS; ++i){
+          delete tabla[i];
+        }
+        delete[] tabla;
+    }
+
+
     /*
     void addAndInc(string key): Si key existe, incrementa su valor, si no existe, crea el par
     (key, 1). Se debe garantizar que sólo haya contención en caso de colisión de hash. Esto es,
@@ -84,7 +92,6 @@ class ConcurrentHashMap {
     Lista<pair<string, unsigned int> > **tabla;
 
    protected:
-
 
     int fHash(char x){
         return (int)x - 97;
