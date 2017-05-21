@@ -16,7 +16,7 @@ all: $(BIN)
 
 $(BIN): ListaAtomica.hpp
 
-test-1: test-1.cpp
+test-1: clean test-1.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-1.cpp $(LDLIBS)
 	
 test-1-run: test-1

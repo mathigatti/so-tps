@@ -37,6 +37,15 @@ public:
 		return _head.load()->_val;
 	}
 
+	void update(const T& oldval, const T& newval) const {
+		Nodo *n = _head.load();
+		while (n->_val != oldval){
+			n = n->_next;
+		}
+		n->_val = newval;
+	}
+
+
 	T& iesimo(int i) const {
 		Nodo *n = _head.load();
 		int j;
@@ -60,6 +69,10 @@ public:
 		}
 
 		T& Siguiente() {
+			return _nodo_sig->_val;
+		}
+
+		Lista::Nodo* NodoSiguiente() {
 			return _nodo_sig->_val;
 		}
 
