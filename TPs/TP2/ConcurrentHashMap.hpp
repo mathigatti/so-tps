@@ -4,10 +4,17 @@
 #include <string>       // std::string
 #include <iostream>
 #include "ListaAtomica.hpp"
+#include "rwlock/RWLock.h"
 
 using namespace std;
 
 #define CANT_ENTRADAS 26
+
+bool estoyCorrriendoAdd = false;
+bool estoyCorriendoMax = false;
+RWLock rwl_corriendoAdd;
+RWLock rwl_corriendoMax;
+RWLock rwl_definoEnElHash;
 
 class ConcurrentHashMap {
    public:
@@ -40,18 +47,26 @@ class ConcurrentHashMap {
     */
 
     void addAndInc(string key){
-        int index = fHash(key[0]);
-        for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
-            auto t = it.Siguiente();
-            if(t.first == key){
-                pair<string, unsigned int> newValue = make_pair(key,t.second + 1);
-                tabla[index]->update(t,newValue);
-            }
-        }        
-        pair<string, unsigned int> value = make_pair(key,1);
-        tabla[index]->push_front(value);
+        rwl_corriendoMax.rlock();
+        while(!estoyCorriendoMax){
+            rwl_corriendoMax.runlock();
+            rwl_corriendoAdd.wlock();
+            estoyCorrriendoAdd = true;
+            rwl_corriendoAdd.wunlock();
+            int index = fHash(key[0]);
+            for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+                auto t = it.Siguiente();
+                if(t.first == key){
+                    pair<string, unsigned int> newValue = make_pair(key,t.second + 1);
+                    rwl_definoEnElHash.wlock();
+                    tabla[index]->update(t,newValue);
+                    rwl_definoEnElHash.wunlock();
+                }
+            }        
+            pair<string, unsigned int> value = make_pair(key,1);
+            tabla[index]->push_front(value);
     }
-
+}
     /*
     bool member(string key): true si y solo si el par (key, x) pertenece al hash map para algún
     x. Esta operación deberá ser wait-free.
@@ -77,17 +92,24 @@ class ConcurrentHashMap {
     */
 
     pair<string, unsigned int> maximum(unsigned int nt){
-        pair<string, unsigned int> maximo = make_pair("Tabla vacia",0);
-        for (int i = 0; i < 26; i++) {
-            for (auto it = tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
-                auto t = it.Siguiente();
-                if(maximo.second < t.second){
-                    maximo = t;
+        rwl_corriendoAdd.rlock();
+        while(!estoyCorrriendoAdd){
+            rwl_corriendoAdd.runlock();
+            rwl_corriendoMax.wlock();
+            estoyCorriendoMax = true;
+            rwl_corriendoMax.wunlock();
+            pair<string, unsigned int> maximo = make_pair("Tabla vacia",0);
+            for (int i = 0; i < 26; i++) {
+                for (auto it = tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+                    auto t = it.Siguiente();
+                    if(maximo.second < t.second){
+                        maximo = t;
+                    }
                 }
             }
+            return maximo;
         }
-        return maximo;
-    }
+}
 
     Lista<pair<string, unsigned int> > **tabla;
 
