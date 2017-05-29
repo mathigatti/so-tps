@@ -28,16 +28,17 @@ int main(void) {
 	pair<string, unsigned int> maximo = h.maximum(1);
 	assert(maximo.first=="casa");
 	assert(maximo.second==1);
-
 	h.addAndInc("casa");
 	h.addAndInc("caasa");
 	h.addAndInc("cafsfasa");
 	h.addAndInc("perro");
-
+	printf("Hasta aca\n");
 	maximo = h.maximum(1);
+	printf("Aca no llega\n");
 	assert(maximo.first=="casa");
 	assert(maximo.second==2);
 	h.addAndInc("a");
+
 	maximo = h.maximum(1);
 	assert(maximo.first=="casa");
 	assert(maximo.second==2);
