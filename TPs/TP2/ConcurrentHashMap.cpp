@@ -1,5 +1,61 @@
 #include "ConcurrentHashMap.h"
 
+struct Multithreading_data{
+    Multithreading_data() : max_key("Lista Vacia"), max_value(0), index_fila_actual(0) {} 
+    string max_key;
+    unsigned int max_value;
+    int index_fila_actual;
+    Lista<pair<string, unsigned int> >::Iterador iterador_siguiente_nodo;
+};
+
+void* maximumInternal(void* multithreading_data) {
+    Multithreading_data* data = (Multithreading_data*) multithreading_data;
+
+    while(data->iterador_siguiente_nodo.HaySiguiente()){     // SI NO HAY MAS SE APUNTA A NULL
+
+        // lockeo para leer que dato voy a trabajar
+        lock_iterador.wlock();
+
+        if(data->iterador_siguiente_nodo.HaySiguiente()){
+            // obtengo el dato y actualizo el iterador global para que se siga procesando en paralelo
+            pair<string, unsigned int> par_actual = data->iterador_siguiente_nodo.Siguiente();
+            data->iterador_siguiente_nodo.Avanzar();
+
+            if(not data->iterador_siguiente_nodo.HaySiguiente()){
+                locks_lista[data->index_fila_actual].runlock();
+                // hay que buscar en otra letra (fila)
+                data->index_fila_actual++;
+                data->iterador_siguiente_nodo = tabla[data->index_fila_actual]->CrearIt();
+
+                for(int i=data->index_fila_actual+1; i<CANT_ENTRADAS && not data->iterador_siguiente_nodo.HaySiguiente(); i++){
+                    data->iterador_siguiente_nodo = tabla[i]->CrearIt();
+                    data->index_fila_actual=i;
+                }
+
+                locks_lista[data->index_fila_actual].rlock();
+
+            }
+        
+            // deslockeo
+            lock_iterador.wunlock();
+
+            // chequeo si hay nuevo maximo
+            string key = par_actual.first;
+            unsigned int value = par_actual.second;
+
+            // pido el recurso del max actual para actualizarlo de ser necesario
+            lock_valor_maximo.wlock();
+            if(data->max_value < value){
+                data->max_value = value;
+                data->max_key = key;
+            lock_valor_maximo.wunlock();
+            }
+        }
+    }
+    pthread_exit(NULL);     // UFF..! :B
+}
+
+
 ConcurrentHashMap::ConcurrentHashMap(){
     tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
     for(int i = 0; i < CANT_ENTRADAS; ++i){
@@ -61,53 +117,6 @@ bool ConcurrentHashMap::member(string key){
     return false;
 }
 
-void* ConcurrentHashMap::maximumInternal(void* multithreading_data) {
-    Multithreading_data* data_ptr = (Multithreading_data*) multithreading_data;
-
-    while(data_ptr->iterador_siguiente_nodo.HaySiguiente()){     // SI NO HAY MAS SE APUNTA A NULL
-
-        // lockeo para leer que dato voy a trabajar
-        lock_iterador.wlock();
-
-        if(data_ptr->iterador_siguiente_nodo.HaySiguiente()){
-            // obtengo el dato y actualizo el iterador global para que se siga procesando en paralelo
-            pair<string, unsigned int> par_actual = data_ptr->iterador_siguiente_nodo.Siguiente();
-            data_ptr->iterador_siguiente_nodo.Avanzar();
-
-            if(not data_ptr->iterador_siguiente_nodo.HaySiguiente()){
-                locks_lista[data_ptr->index_fila_actual].runlock();
-                // hay que buscar en otra letra (fila)
-                data_ptr->index_fila_actual++;
-                data_ptr->iterador_siguiente_nodo = tabla[data_ptr->index_fila_actual]->CrearIt();
-
-                for(int i=data_ptr->index_fila_actual+1; i<CANT_ENTRADAS && not data_ptr->iterador_siguiente_nodo.HaySiguiente(); i++){
-                    data_ptr->iterador_siguiente_nodo = tabla[i]->CrearIt();
-                    data_ptr->index_fila_actual=i;
-                }
-
-                locks_lista[data_ptr->index_fila_actual].rlock();
-
-            }
-        
-            // deslockeo
-            lock_iterador.wunlock();
-
-            // chequeo si hay nuevo maximo
-            string key = par_actual.first;
-            unsigned int value = par_actual.second;
-
-            // pido el recurso del max actual para actualizarlo de ser necesario
-            lock_valor_maximo.wlock();
-            if(data_ptr->max_value < value){
-                data_ptr->max_value = value;
-                data_ptr->max_key = key;
-            lock_valor_maximo.wunlock();
-            }
-        }
-    }
-    pthread_exit(NULL);     // UFF..! :B
-}
-
 /*
 pair<string, unsigned int>maximum(unsigned int nt): devuelve el par (k, m) tal que
 k es la clave con máxima cantidad de apariciones y m es ese valor. No puede ser concurrente
@@ -146,3 +155,5 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
 int ConcurrentHashMap::fHash(char x){
     return (int)x - 97;
 }
+
+
