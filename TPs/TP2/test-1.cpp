@@ -1,6 +1,6 @@
 #include <iostream>
 #include "ListaAtomica.hpp"
-#include "ConcurrentHashMap.hpp"
+#include "ConcurrentHashMap.h"
 #include <assert.h>     /* assert */
 
 using namespace std;
