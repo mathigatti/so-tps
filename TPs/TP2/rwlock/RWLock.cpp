@@ -5,7 +5,6 @@ RWLock :: RWLock() {
     pthread_cond_init(&condition, NULL);
     readers = 0;
     writers = 0;
-    writing = false;
 }
 
 RWLock :: ~RWLock() {
@@ -26,30 +25,27 @@ void RWLock :: runlock() {
     lock();
     readers--;
     if(readers == 0)
-        // notificamos a un escritor, si hay alguno
-        signal();
+        // notificamos a los escritores, de haber esperando
+        broadcast();
     unlock();
 }
 
 void RWLock :: wlock() {
     lock();
     writers++;
-    while (writing || readers > 0)
+    while (readers > 0)
         // esperamos a que nos notifique el escritor actual
         // o el ultimo lector
         wait();
-    writing = true;
     unlock();
 }
 
 void RWLock :: wunlock() {
     lock();
     writers--;
-    writing = false;
-    // avisamos a todos
-    // si hay escritores sigue alguno
-    // y los lectores vuelven a dormir
-    broadcast();
+    if(writers == 0)
+        // notificamos a los lectores 
+        broadcast();
     unlock();
 }
 

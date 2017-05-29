@@ -7,7 +7,6 @@ class RWLock {
     private:
     unsigned int readers;
 	unsigned int writers;
-	unsigned int writing;
 	pthread_mutex_t mutex;
 	pthread_cond_t condition;
 
