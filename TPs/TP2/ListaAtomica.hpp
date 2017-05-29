@@ -71,10 +71,6 @@ public:
 			return _nodo_sig->_val;
 		}
 
-		Lista::Nodo* NodoSiguiente() {
-			return _nodo_sig->_val;
-		}
-
 		void Avanzar() {
 			_nodo_sig = _nodo_sig->_next;
 		}
