@@ -14,7 +14,6 @@ using namespace std;
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock lock_iterador;
 RWLock lock_valor_maximo;
-Lista<pair<string, unsigned int> > **tabla;
 
 class ConcurrentHashMap {
    public:
@@ -26,10 +25,8 @@ class ConcurrentHashMap {
     pair<string, unsigned int> maximum(unsigned int nt);
 
    private:
-
+    Lista<pair<string, unsigned int> > **tabla;
     int fHash(char x);
-
-
 
 };
 

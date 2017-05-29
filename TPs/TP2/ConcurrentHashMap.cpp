@@ -6,10 +6,13 @@ struct Multithreading_data{
     unsigned int max_value;
     int index_fila_actual;
     Lista<pair<string, unsigned int> >::Iterador iterador_siguiente_nodo;
+    Lista<pair<string, unsigned int> > **tabla;
 };
 
 void* maximumInternal(void* multithreading_data) {
     Multithreading_data* data = (Multithreading_data*) multithreading_data;
+    Lista<pair<string, unsigned int> > **tabla = (data->tabla);
+
 
     while(data->iterador_siguiente_nodo.HaySiguiente()){     // SI NO HAY MAS SE APUNTA A NULL
 
@@ -127,6 +130,7 @@ array. Si no tienen filas por procesar terminarán su ejecución.
 pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
     Multithreading_data* data = new Multithreading_data();
     data->iterador_siguiente_nodo = tabla[0]->CrearIt();
+    data->tabla = tabla;
 
     for(int i=1; i<CANT_ENTRADAS && not data->iterador_siguiente_nodo.HaySiguiente(); i++){
         data->iterador_siguiente_nodo = tabla[i]->CrearIt();
