@@ -1,13 +1,16 @@
 #include "ConcurrentHashMap.h"
+#include "rwlock/RWLock.h"
 
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
 
 struct Multithreading_data{
     Multithreading_data() : max_key("Lista Vacia"), max_value(0), index_fila_actual(0) {} 
+
     string max_key;
     unsigned int max_value;
     int index_fila_actual;
+
     Lista<pair<string, unsigned int> >::Iterador iterador_siguiente_nodo;
     Lista<pair<string, unsigned int> > **tabla;
     RWLock lock_iterador;
@@ -48,8 +51,11 @@ void* maximumInternal(void* multithreading_data) {
                 data->max_value = value;
                 data->max_key = key;
             }
+
             data->lock_valor_maximo.wunlock();
+
         }
+
         data->lock_iterador.wunlock();
 
     }
@@ -71,6 +77,9 @@ ConcurrentHashMap::~ConcurrentHashMap() {
     delete[] tabla;
 }
 
+ConcurrentHashMap ConcurrentHashMap::count_words(string key){
+    return ConcurrentHashMap();
+}
 
 /*
 void addAndInc(string key): Si key existe, incrementa su valor, si no existe, crea el par
@@ -163,12 +172,9 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
 
     rw_lock.runlock();
 
-
     return make_pair(data->max_key, data->max_value);
 }
 
 int ConcurrentHashMap::fHash(char x){
     return (int)x - 97;
 }
-
-

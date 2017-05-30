@@ -37,7 +37,7 @@ int main(void) {
 	assert(maximo.second==2);
 	h.addAndInc("a");
 
-	maximo = h.maximum(1);
+	maximo = h.maximum(30);
 	assert(maximo.first=="casa");
 	assert(maximo.second==2);
 	h.addAndInc("a");

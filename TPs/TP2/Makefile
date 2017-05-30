@@ -6,7 +6,7 @@ CXX = g++
 CXXFLAGS = -std=c++11 -pthread
 
 BIN = test-1 test-2 test-3 test-5
-OBJ = ConcurrentHashMap.o
+OBJ = ConcurrentHashMap.o rwlock/RWLock.o
 
 all: $(BIN)
 
@@ -18,14 +18,14 @@ ConcurrentHashMap.o: ConcurrentHashMap.cpp ConcurrentHashMap.h
 rwlock/RWLock.o: rwlock/RWLock.cpp rwlock/RWLock.h
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-test-1: test-1.cpp ConcurrentHashMap.h ConcurrentHashMap.o rwlock/RWLock.h rwlock/RWLock.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) ConcurrentHashMap.o rwlock/RWLock.o -o $@ test-1.cpp $(LDLIBS)
+test-1: $(OBJ) test-1.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-1.cpp $(LDLIBS)
 	
 test-1-run: test-1
 			./test-1
 
 test-2: $(OBJ) test-2.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-2.cpp $(OBJ) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-2.cpp $(LDLIBS)
 	
 test-2-run: test-2
 	awk -f corpus.awk corpus | sort >corpus-post
