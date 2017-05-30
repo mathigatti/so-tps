@@ -3,6 +3,7 @@
 #include <iostream>
 #include "ListaAtomica.hpp"
 #include <stdio.h>
+#include <fstream>
 
 using namespace std;
 

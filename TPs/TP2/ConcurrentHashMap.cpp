@@ -77,8 +77,16 @@ ConcurrentHashMap::~ConcurrentHashMap() {
     delete[] tabla;
 }
 
-ConcurrentHashMap ConcurrentHashMap::count_words(string key){
-    return ConcurrentHashMap();
+ConcurrentHashMap ConcurrentHashMap::count_words(string arch){
+
+    ConcurrentHashMap h;
+    ifstream palabras(arch.c_str(),std::ifstream::in);
+    for (string linea; getline(palabras, linea); ){
+        h.addAndInc(linea);
+
+    }
+
+    return h;
 }
 
 /*
