@@ -70,6 +70,42 @@ ConcurrentHashMap::ConcurrentHashMap(){
     }
 }
 
+ConcurrentHashMap::ConcurrentHashMap(const ConcurrentHashMap& aCopiar){
+    cout << "Hola"<< endl;
+    tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
+    for(int i = 0; i < CANT_ENTRADAS; ++i){
+      tabla[i] = new Lista<pair<string, unsigned int> >;
+    }
+
+    for (int i = 0; i < 26; i++) {
+        for (auto it = aCopiar.tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+            auto t = it.Siguiente();
+            pair<string, unsigned int> value = make_pair(t.first,t.second);
+            tabla[i]->push_front(value);
+        }
+    }
+}
+
+/*
+ConcurrentHashMap operator=(const ConcurrentHashMap& aCopiar){
+        cout << "Hola"<< endl;
+    tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
+    for(int i = 0; i < CANT_ENTRADAS; ++i){
+      tabla[i] = new Lista<pair<string, unsigned int> >;
+    }
+
+    for (int i = 0; i < 26; i++) {
+        for (auto it = aCopiar.tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
+            auto t = it.Siguiente();
+            pair<string, unsigned int> value = make_pair(t.first,t.second);
+            tabla[i]->push_front(value);
+        }
+    }
+
+ return *this;
+
+}
+*/
 ConcurrentHashMap::~ConcurrentHashMap() {
     for(int i = 0; i < CANT_ENTRADAS; ++i){
       delete tabla[i];
@@ -85,6 +121,7 @@ ConcurrentHashMap ConcurrentHashMap::count_words(string arch){
         h.addAndInc(linea);
 
     }
+
 
     return h;
 }

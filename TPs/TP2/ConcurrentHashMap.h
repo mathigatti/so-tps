@@ -12,6 +12,7 @@ using namespace std;
 class ConcurrentHashMap {
    public:
     ConcurrentHashMap();
+    ConcurrentHashMap(const ConcurrentHashMap& aCopiar);
     ~ConcurrentHashMap();
     static ConcurrentHashMap count_words(string key);
 
@@ -20,6 +21,8 @@ class ConcurrentHashMap {
     pair<string, unsigned int> maximum(unsigned int nt);
 
     Lista<pair<string, unsigned int> > **tabla;
+
+    //ConcurrentHashMap operator=(const ConcurrentHashMap& otro);
 
    private:
     int fHash(char x);
