@@ -3,7 +3,8 @@
 .SUFFIXES: .o .cpp
 
 CXX = g++
-CXXFLAGS = -std=c++11 -pthread
+CXXFLAGS = -std=c++11
+LDLIBS = -lpthread
 
 BIN = test-1 test-2 test-3 test-5
 OBJ = ConcurrentHashMap.o rwlock/RWLock.o
