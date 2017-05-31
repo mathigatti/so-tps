@@ -6,9 +6,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 	ConcurrentHashMap h;
-	list<string> l = { "palabras1", "palabras2", "palabras3", "palabras4", "palabras5"};
-	//list<string> l = { "corpus-0", "corpus-1", "corpus-2", "corpus-3", "corpus-4" };
-	//list<string> l = { "corpus"};
+	list<string> l = { "corpus-0", "corpus-1", "corpus-2", "corpus-3", "corpus-4" };
 	int i;
 
 	h = ConcurrentHashMap::count_words_ej3(l);
@@ -18,9 +16,6 @@ int main(int argc, char **argv) {
 			cout << t.first << " " << t.second << endl;
 		}
 	}
-
-	//cout<<"HOLAA"<<h.member("ginebra")<<endl;
-
 
 	return 0;
 }

@@ -5,7 +5,7 @@ RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
 
 struct Count_words_data{
-    ConcurrentHashMap h;
+    ConcurrentHashMap* h;
     string file;
 };
 
@@ -25,7 +25,6 @@ struct Multithreading_data{
 void* count_words_aux(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     ConcurrentHashMap::count_words(words_data->file,words_data->h);
-   // cout<<"HOLA"<<words_data->h.member("ginebra")<<endl;
 }
 
 void* maximumInternal(void* multithreading_data) {
@@ -96,58 +95,33 @@ ConcurrentHashMap::ConcurrentHashMap(const ConcurrentHashMap& aCopiar){
     }
 }
 
-/*
-ConcurrentHashMap operator=(const ConcurrentHashMap& aCopiar){
-        cout << "Hola"<< endl;
-    tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
-    for(int i = 0; i < CANT_ENTRADAS; ++i){
-      tabla[i] = new Lista<pair<string, unsigned int> >;
-    }
-
-    for (int i = 0; i < 26; i++) {
-        for (auto it = aCopiar.tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
-            auto t = it.Siguiente();
-            pair<string, unsigned int> value = make_pair(t.first,t.second);
-            tabla[i]->push_front(value);
-        }
-    }
-
- return *this;
-
-}
-*/
-
-ConcurrentHashMap ConcurrentHashMap::count_words_ej2(string arch){
-    ConcurrentHashMap h;
-    return count_words(arch,h);
-}
-
-ConcurrentHashMap ConcurrentHashMap::count_words(string arch, ConcurrentHashMap& h){
+ConcurrentHashMap ConcurrentHashMap::count_words(string arch, ConcurrentHashMap* h){
 
     ifstream palabras(arch);
     string linea;
     while (getline(palabras, linea)){
-        h.addAndInc(linea);
+        h->addAndInc(linea);
     }
 
+    return *h;
 
-    //cout<<"HOLA"<<h.member("ginebra")<<endl;
-    return h;
+}
 
+ConcurrentHashMap ConcurrentHashMap::count_words_ej2(string arch){
+    ConcurrentHashMap h;
+    return count_words(arch,&h);
 }
 
 ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     int size = archs.size();
-
     pthread_t pthrds[size];
 
     ConcurrentHashMap h;
-    //Count_words_data* data = new Count_words_data();
-    //data->h = h;
+
     int i = 0;
     for (auto it = archs.begin(); it != archs.end(); ++it){
         Count_words_data data = {};
-        data.h = h;
+        data.h = &h;
         data.file = *it;
         pthread_create(&pthrds[i], NULL, count_words_aux, &data);
         i++;
@@ -156,10 +130,7 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
         pthread_join(pthrds[t], NULL);
     }
 
-    //cout<<"HOLAD"<<h.member("ginebra")<<endl;
-
     return h;
-
 
 }
 

@@ -16,7 +16,7 @@ class ConcurrentHashMap {
     ConcurrentHashMap(const ConcurrentHashMap& aCopiar);
     static ConcurrentHashMap count_words_ej2(string arch);
     static ConcurrentHashMap count_words_ej3(list<string>archs);
-    static ConcurrentHashMap count_words(string arch, ConcurrentHashMap& h);
+    static ConcurrentHashMap count_words(string arch, ConcurrentHashMap* h);
 
     void addAndInc(string key);
     bool member(string key);
