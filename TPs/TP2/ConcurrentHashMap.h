@@ -4,6 +4,7 @@
 #include "ListaAtomica.hpp"
 #include <stdio.h>
 #include <fstream>
+#include <list>
 
 using namespace std;
 
@@ -13,7 +14,9 @@ class ConcurrentHashMap {
    public:
     ConcurrentHashMap();
     ConcurrentHashMap(const ConcurrentHashMap& aCopiar);
-    static ConcurrentHashMap count_words(string arch);
+    static ConcurrentHashMap count_words_ej2(string arch);
+    static ConcurrentHashMap count_words_ej3(list<string>archs);
+    static ConcurrentHashMap count_words(string arch, ConcurrentHashMap h);
 
     void addAndInc(string key);
     bool member(string key);

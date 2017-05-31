@@ -4,6 +4,11 @@
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
 
+struct Count_words_data{
+    ConcurrentHashMap h;
+    string file;
+};
+
 struct Multithreading_data{
     Multithreading_data() : max_key("Lista Vacia"), max_value(0), index_fila_actual(0) {} 
 
@@ -16,6 +21,11 @@ struct Multithreading_data{
     RWLock lock_iterador;
     RWLock lock_valor_maximo;
 };
+
+void* count_words_aux(void* data){
+    Count_words_data* words_data = (Count_words_data*) data;
+    ConcurrentHashMap::count_words(words_data->file,words_data->h);
+}
 
 void* maximumInternal(void* multithreading_data) {
 
@@ -106,17 +116,42 @@ ConcurrentHashMap operator=(const ConcurrentHashMap& aCopiar){
 }
 */
 
-ConcurrentHashMap ConcurrentHashMap::count_words(string arch){
-
+ConcurrentHashMap ConcurrentHashMap::count_words_ej2(string arch){
     ConcurrentHashMap h;
+    return count_words(arch,h);
+}
+
+ConcurrentHashMap ConcurrentHashMap::count_words(string arch, ConcurrentHashMap h){
 
     ifstream palabras(arch);
-    string linea = "";
+    string linea;
     while (getline(palabras, linea)){
         h.addAndInc(linea);
     }
     return h;
+
 }
+
+ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
+    int size = archs.size();
+
+    pthread_t pthrds[size];
+
+    ConcurrentHashMap h;
+    int i = 0;
+    for (auto it = archs.begin(); it != archs.end(); ++it){
+        Count_words_data data = {};
+        data.h = h;
+        data.file = *it;
+        pthread_create(&pthrds[i], NULL, count_words_aux, &data);
+        i++;
+    }
+    for(int t=0; t<size; t++){
+        pthread_join(pthrds[t], NULL);
+    }
+
+}
+
 
 /*
 void addAndInc(string key): Si key existe, incrementa su valor, si no existe, crea el par
@@ -198,7 +233,6 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
     // si hay elementos en la lista, corremos
     if(data->iterador_siguiente_nodo.HaySiguiente()){
         for(int t=0; t<nt; t++){
-            int unused = 0;
             pthread_create(&pthrds[t], NULL, maximumInternal, data);
         }
         /** espero que terminen los threads de correr **/

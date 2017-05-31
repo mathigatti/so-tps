@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-#include "ConcurrentHashMap.hpp"
+#include "ConcurrentHashMap.h"
 
 using namespace std;
 

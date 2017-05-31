@@ -34,7 +34,7 @@ test-2-run: test-2
 	rm -f corpus-post
 
 test-3: $(OBJ) test-3.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-3.cpp $(OBJ) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-3.cpp $(LDLIBS)
 
 test-3-run: test-3
 	awk -f corpus.awk corpus | sort >corpus-post
