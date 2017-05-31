@@ -1,5 +1,5 @@
 #include "ConcurrentHashMap.h"
-#include "rwlock/RWLock.h"
+#include "locks/RWLock.h"
 
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;

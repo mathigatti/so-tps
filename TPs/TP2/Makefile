@@ -7,7 +7,7 @@ CXXFLAGS = -std=c++11
 LDLIBS = -lpthread
 
 BIN = test-1 test-2 test-3 test-5
-OBJ = ConcurrentHashMap.o rwlock/RWLock.o
+OBJ = ConcurrentHashMap.o locks/RWLock.o
 
 all: $(BIN)
 
@@ -16,7 +16,7 @@ $(BIN): ListaAtomica.hpp
 ConcurrentHashMap.o: ConcurrentHashMap.cpp ConcurrentHashMap.h
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-rwlock/RWLock.o: rwlock/RWLock.cpp rwlock/RWLock.h
+locks/RWLock.o: locks/RWLock.cpp locks/RWLock.h
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 test-1: $(OBJ) test-1.cpp
