@@ -6,8 +6,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 	ConcurrentHashMap h;
-	list<string> l = { "palabras1", "palabras2", "palabras3", "palabras4", "palabras5"};
-	int i;
+	list<string> l = { "corpus-0", "corpus-1", "corpus-2", "corpus-3", "corpus-4" };
 
 	h = ConcurrentHashMap::count_words_ej3(l);
 	for (i = 0; i < 26; i++) {

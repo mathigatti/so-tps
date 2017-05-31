@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <fstream>
 #include <list>
-
-using namespace std;
+#include "locks/RWLock.h"
 
 #define CANT_ENTRADAS 26
+
+using namespace std;
 
 class ConcurrentHashMap {
    public:

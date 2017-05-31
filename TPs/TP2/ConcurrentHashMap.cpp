@@ -1,5 +1,4 @@
 #include "ConcurrentHashMap.h"
-#include "locks/RWLock.h"
 
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
@@ -119,8 +118,8 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     ConcurrentHashMap h;
 
     int i = 0;
+    Count_words_data data = {};
     for (auto it = archs.begin(); it != archs.end(); ++it){
-        Count_words_data data = {};
         data.h = &h;
         data.file = *it;
         pthread_create(&pthrds[i], NULL, count_words_aux, &data);
@@ -146,7 +145,7 @@ void ConcurrentHashMap::addAndInc(string key){
     rw_lock.wlock();
     
     /** obtenemos acceso a la lista correspondiente y la lockeamos **/
-    int index = fHash(key[0]);      
+    int index = fHash(key[0]);
     locks_lista[index].wlock();
     
     /** agregamos o incrementamos segun corresponda **/
