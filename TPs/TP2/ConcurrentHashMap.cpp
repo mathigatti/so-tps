@@ -117,12 +117,14 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
 
     ConcurrentHashMap h;
 
+    Count_words_data data[size];
+
     int i = 0;
-    Count_words_data data = {};
+
     for (auto it = archs.begin(); it != archs.end(); ++it){
-        data.h = &h;
-        data.file = *it;
-        pthread_create(&pthrds[i], NULL, count_words_aux, &data);
+        data[i].h = &h;
+        data[i].file = *it;
+        pthread_create(&pthrds[i], NULL, count_words_aux, &data[i]);
         i++;
     }
     for(int t=0; t<size; t++){
