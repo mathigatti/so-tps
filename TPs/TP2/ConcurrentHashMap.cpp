@@ -25,6 +25,7 @@ struct Multithreading_data{
 void* count_words_aux(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     ConcurrentHashMap::count_words(words_data->file,words_data->h);
+   // cout<<"HOLA"<<words_data->h.member("ginebra")<<endl;
 }
 
 void* maximumInternal(void* multithreading_data) {
@@ -121,13 +122,16 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej2(string arch){
     return count_words(arch,h);
 }
 
-ConcurrentHashMap ConcurrentHashMap::count_words(string arch, ConcurrentHashMap h){
+ConcurrentHashMap ConcurrentHashMap::count_words(string arch, ConcurrentHashMap& h){
 
     ifstream palabras(arch);
     string linea;
     while (getline(palabras, linea)){
         h.addAndInc(linea);
     }
+
+
+    //cout<<"HOLA"<<h.member("ginebra")<<endl;
     return h;
 
 }
@@ -138,6 +142,8 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     pthread_t pthrds[size];
 
     ConcurrentHashMap h;
+    //Count_words_data* data = new Count_words_data();
+    //data->h = h;
     int i = 0;
     for (auto it = archs.begin(); it != archs.end(); ++it){
         Count_words_data data = {};
@@ -149,6 +155,11 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     for(int t=0; t<size; t++){
         pthread_join(pthrds[t], NULL);
     }
+
+    //cout<<"HOLAD"<<h.member("ginebra")<<endl;
+
+    return h;
+
 
 }
 
