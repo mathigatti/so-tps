@@ -3,13 +3,14 @@
 #include <vector>
 #include <unistd.h>
 #include <stdlib.h>
-#include <time.h>
+#include <time.h>   
 #include "RWLock.h"
 
 using namespace std;
 
 unsigned int shared_data = 0;
 RWLock rwl;
+
 
 enum OperationType {
     Read,
@@ -300,6 +301,7 @@ void * reader(void * data) {
     rwl.runlock();
     pthread_exit(NULL);
 }
+
 
 void * writer(void * data) {
     log l;
