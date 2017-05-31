@@ -71,7 +71,6 @@ ConcurrentHashMap::ConcurrentHashMap(){
 }
 
 ConcurrentHashMap::ConcurrentHashMap(const ConcurrentHashMap& aCopiar){
-    cout << "Hola"<< endl;
     tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
     for(int i = 0; i < CANT_ENTRADAS; ++i){
       tabla[i] = new Lista<pair<string, unsigned int> >;
@@ -106,23 +105,16 @@ ConcurrentHashMap operator=(const ConcurrentHashMap& aCopiar){
 
 }
 */
-ConcurrentHashMap::~ConcurrentHashMap() {
-    for(int i = 0; i < CANT_ENTRADAS; ++i){
-      delete tabla[i];
-    }
-    delete[] tabla;
-}
 
 ConcurrentHashMap ConcurrentHashMap::count_words(string arch){
 
     ConcurrentHashMap h;
-    ifstream palabras(arch.c_str(),std::ifstream::in);
-    for (string linea; getline(palabras, linea); ){
+
+    ifstream palabras(arch);
+    string linea = "";
+    while (getline(palabras, linea)){
         h.addAndInc(linea);
-
     }
-
-
     return h;
 }
 

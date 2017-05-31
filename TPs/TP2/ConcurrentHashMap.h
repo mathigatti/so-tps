@@ -13,8 +13,7 @@ class ConcurrentHashMap {
    public:
     ConcurrentHashMap();
     ConcurrentHashMap(const ConcurrentHashMap& aCopiar);
-    ~ConcurrentHashMap();
-    static ConcurrentHashMap count_words(string key);
+    static ConcurrentHashMap count_words(string arch);
 
     void addAndInc(string key);
     bool member(string key);
