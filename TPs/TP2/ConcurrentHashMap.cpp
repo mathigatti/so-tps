@@ -2,10 +2,13 @@
 
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
+RWLock rw_lock_ej4;
 
 struct Count_words_data{
     ConcurrentHashMap* h;
     string file;
+    unsigned int* next_available;
+    list<string>archs;
 };
 
 struct Multithreading_data{
@@ -21,9 +24,38 @@ struct Multithreading_data{
     RWLock lock_valor_maximo;
 };
 
+string iesimo(list<string>archs, int iesimo){
+    if (archs.size() > iesimo){
+        std::list<string>::iterator it = archs.begin();
+        std::advance(it, iesimo);
+        return *it;
+    }
+    return "";
+}
+
 void* count_words_aux(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     ConcurrentHashMap::count_words(words_data->file,words_data->h);
+}
+
+void* count_words_aux2(void* data){
+    Count_words_data* words_data = (Count_words_data*) data;
+    int size = (words_data->archs).size();
+    unsigned int proximo = 0;
+
+    string arch;
+    while(proximo < size){
+        rw_lock_ej4.wlock();
+        unsigned int next_available = *(words_data->next_available);
+        proximo = next_available;
+        (*(words_data->next_available))++;
+        rw_lock_ej4.wunlock();
+
+        if(proximo < size){
+            arch = iesimo((words_data->archs),proximo);
+            ConcurrentHashMap::count_words(arch,words_data->h);
+        }
+    }
 }
 
 void* maximumInternal(void* multithreading_data) {
@@ -120,7 +152,6 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     Count_words_data data[size];
 
     int i = 0;
-
     for (auto it = archs.begin(); it != archs.end(); ++it){
         data[i].h = &h;
         data[i].file = *it;
@@ -135,6 +166,33 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
 
 }
 
+ConcurrentHashMap ConcurrentHashMap::count_words_ej4(unsigned int n,
+list<string>archs){
+    int size = archs.size();
+    pthread_t pthrds[n];
+
+    ConcurrentHashMap h;
+
+    Count_words_data data[n];
+
+    int i = 0;
+
+    unsigned int next_available = 0;
+    for (auto it = archs.begin(); it != archs.end() && i < n; ++it){
+        data[i].h = &h;
+        data[i].next_available = &next_available;
+        data[i].archs = archs;
+        pthread_create(&pthrds[i], NULL, count_words_aux2, &data[i]);
+        i++;
+    }
+
+    for(int t=0; t<n; t++){
+        pthread_join(pthrds[t], NULL);
+    }
+
+    return h;
+
+}
 
 /*
 void addAndInc(string key): Si key existe, incrementa su valor, si no existe, crea el par
