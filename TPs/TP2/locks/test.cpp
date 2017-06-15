@@ -1,276 +1,319 @@
-#include "RWLock.h"
-
 #include <cassert>
 #include <iostream>
-#include <pthread.h>
+#include <vector>
 #include <unistd.h>
-
-#include <semaphore.h>
+#include <stdlib.h>
+#include <time.h>   
+#include "RWLock.h"
 
 using namespace std;
 
-#define CANT_THREADS 60
+unsigned int shared_data = 0;
+RWLock rwl;
 
-#define test(fn)                           \
-    do {                                   \
-        cout << "running " << #fn << endl; \
-        fn();                              \
-    } while (0)
 
-class RWLockTester : public RWLock {
-    // Non thread safe
-   public:
-    bool isWriting() { return writing; }
-    bool isReading() { return reading; }
-    bool isLocked() { return writing or reading; }
-    int writersLeft() { return writers; }
-    int readersLeft() { return reading; }
+enum OperationType {
+    Read,
+    Write
 };
 
-int variable_global = 0;
-RWLockTester lock;
-sem_t contador, escribir, leer;
-
-void *lecturas_concurrentes(void*) {
-
-    lock.rlock();
-    std::cout << "Nuevo lector, cantidad total:" << lock.readersLeft() << std::endl;
-
-    if (lock.readersLeft() < CANT_THREADS) {
-        sem_wait(&contador);
-    } else {
-        assert(lock.readersLeft() == CANT_THREADS);
-        for (int i = 0; i< CANT_THREADS; ++i)
-            sem_post(&contador);
-    }
-    lock.runlock();
-    return nullptr;
-}
-
-// Test inanición 1 --------------------------------------------------------
-// lector llega, libera escritor para que se declare writer y
-// antes de terminar también larga la tanda de lectores (que deben esperar)
-// de lo contrario podrían generarle inanición al escritor
-void *lector_t1(void*) {
-    lock.rlock();
-    sem_post(&escribir);
-    // Escritor todavía no puede tomar el lock (no lo solté)
-    // pero sí declararse como writer
-    // lo esperamos. No podemos usar vc o semáforo porque
-    // la declaración de writer sucede durante el wlock.
-    while (lock.writersLeft() == 0)
-        usleep(100000);
-
-    for (int i = 2; i < CANT_THREADS; ++i)
-        sem_post(&leer);
-    lock.runlock();
-    return nullptr;
-}
-
-void *lectores_t1(void*) {
-    sem_wait(&leer);
-    lock.rlock();
-    // El escritor ya terminó
-    assert(lock.writersLeft() == 0);
-    lock.runlock();
-    return nullptr;
-}
-
-void *escritor_t1(void*) {
-    sem_wait(&escribir);
-    lock.wlock();
-    lock.wunlock();
-    return nullptr;
-}
-
-// Test inanición 2 --------------------------------------------------------
-// Queremos ver el orden en que llegan llamados del tipo:
-// tanda de lectores - escritor - tanda de lectores
-// ó tanda de escritores - lector - tanda de escritores
-// Queremos ver que ni el escritor ni el lector quedan últimos siempre
-
-void *lector(void*) {
-    lock.rlock();
-    std::cout << "R" << std::endl;
-    usleep(50000);
-    lock.runlock();
-    return nullptr;
-}
-
-void *escritor(void*) {
-    lock.wlock();
-    std::cout << "W" << std::endl;
-    usleep(50000);
-    lock.wunlock();
-    return nullptr;
-}
-
-
-// Test multithread --------------------------------------------------------
-void *pTest(void* tidP) {
-    int tid = (long) tidP;
-
-    lock.rlock();
-
-        assert(lock.isLocked());
-        assert(lock.readersLeft() >= 1);
-        cout << tid << " - Reading! "  << variable_global << endl;
-
-    lock.runlock();
-
-    lock.wlock();
-
-        //assert(lock.isWriting());
-        //assert(lock.writersLeft() >= 1);
-
-        cout << tid << " - Writing! " << variable_global + 1 << endl;
-
-        variable_global++;
-
-        // Hago algo por 10 milisegundos
-        usleep(10000);
-
-        //variable_global--;
-
-        //assert(not variable_global);
-
-    lock.wunlock();
-
-    return nullptr;
-}
-
-
-// Test básico -------------------------------------------------------------
-void test_basic() {
-    RWLockTester lock;
-
-    assert(not lock.isLocked());
-
-    lock.rlock();
-    lock.rlock();
-    lock.rlock();
-
-    assert(lock.isLocked());
-    assert(lock.readersLeft() == 3);
-
-    lock.runlock();
-    lock.runlock();
-    lock.runlock();
-
-    assert(not lock.isLocked());
-
-    lock.wlock();
-
-    assert(lock.isWriting());
-    assert(lock.writersLeft() == 1);
-
-    lock.wunlock();
-
-    assert(not lock.isLocked());
-}
-
-int main() {
-
-    // Test Basico
-
-        test(test_basic);
-
-        cout << "Test Basico Terminado!" << endl;
-
-	// Test Multi Threads
-    {
-    	cout << "Empezamos Test Multi Threads! La variable_global vale: " << variable_global << endl;
-
-        pthread_t thread[CANT_THREADS];
-        int tid;
-
-        for (tid = 0; tid < CANT_THREADS; ++tid)
-             pthread_create(&thread[tid], NULL, pTest, (void*)(long)tid);
-
-        for (tid = 0; tid < CANT_THREADS; ++tid)
-             pthread_join(thread[tid], NULL);
-
-        cout << "Terminamos Test Multi Threads! La variable_global vale: " << variable_global << endl;
-    }
-
-    // Test lecturas concurrentes (esperan a que estén todos los threads leyendo para soltar el lock)
-
-    {
-        cout << "Empezando test de lecturas concurrentes" << endl;
-
-        pthread_t thread[CANT_THREADS];
-        int tid;
-
-        sem_init(&contador, 0, 0);
-
-        for (tid = 0; tid < CANT_THREADS; ++tid)
-             pthread_create(&thread[tid], NULL, lecturas_concurrentes, NULL);
-
-        for (tid = 0; tid < CANT_THREADS; ++tid)
-             pthread_join(thread[tid], NULL);
-
-
-        cout << "Terminado test de lecturas concurrentes" << endl;
-    }
-
-    // Tests de inanición
-
-        std::cout << "Empezando test de inanición (lectores a escritores) ---------------" << std::endl;
-    {
-        pthread_t thread[CANT_THREADS];
-        int tid;
-
-        sem_init(&leer, 0, 0);
-        sem_init(&escribir, 0, 0);
-
-        pthread_create(&thread[0], NULL, lector_t1, NULL);
-        pthread_create(&thread[1], NULL, escritor_t1, NULL);
-
-        // estos deberían esperar al escritor (ver funciones de cada thread)
-
-        for (tid = 2; tid < CANT_THREADS; ++tid)
-            pthread_create(&thread[tid], NULL, lectores_t1, NULL);
-
-        for (tid = 0; tid < CANT_THREADS; ++tid)
-             pthread_join(thread[tid], NULL);
-
-        std::cout << "Terminado test de inanición (lectores a escritores)" << std::endl;
-    }
-    // Test de inanición en general, no assertea pero queremos ver el orden
-    // en que ejecutan los llamados
-    {
-        std::cout << "Empezando test de inanición gral ---------------" << std::endl;
-
-        pthread_t thread[CANT_THREADS];
-        int tid;
-
-        std::cout << "LECTORES -> ESCRITOR -> LECTORES" << std::endl;
-
-            for (tid = 0; tid < CANT_THREADS/4; ++tid)
-                pthread_create(&thread[tid], NULL, lector, NULL);
-
-            pthread_create(&thread[CANT_THREADS/4], NULL, escritor, NULL);
-
-            for (tid = CANT_THREADS/4 + 1; tid < CANT_THREADS/2; ++tid)
-                pthread_create(&thread[tid], NULL, lector, NULL);
-
-            for (tid = 0; tid < CANT_THREADS/2; ++tid)
-                 pthread_join(thread[tid], NULL);
-                 
-        cout << endl << "ESCRITORES -> LECTOR -> ESCRITORES" << endl;
-
-            for (tid = CANT_THREADS/2; tid < 3*CANT_THREADS/4; ++tid)
-                pthread_create(&thread[tid], NULL, escritor, NULL);
-
-            pthread_create(&thread[3*CANT_THREADS/4], NULL, lector, NULL);
-
-            for (tid = 3*CANT_THREADS/4 + 1; tid < CANT_THREADS; ++tid)
-                pthread_create(&thread[tid], NULL, escritor, NULL);
-
-            for (tid = CANT_THREADS/2; tid < CANT_THREADS; ++tid)
-                 pthread_join(thread[tid], NULL);
-
-        std::cout << "Terminado test de inanición gral" << std::endl;
-    }
+struct log {
+    OperationType type;
+    unsigned int data_value;
+};
+
+vector<log> logs;
+pthread_mutex_t logs_mutex;
+
+void * reader(void * data);
+void * writer(void * data);
+
+void mutual_exclusion();
+void multiple_readers();
+void single_writer();
+void starvation_free();
+void general_test();
+void starvation_free_bigger();
+
+int main(int argc, char ** argv) {
+    pthread_mutex_init(&logs_mutex, NULL);
+
+    //----- TESTS BEGIN -------
+    mutual_exclusion();  
+    multiple_readers();
+    single_writer();
+    starvation_free();
+    general_test();
+    starvation_free_bigger();
+    //------ TESTS END --------
+
+    pthread_mutex_destroy(&logs_mutex);
     return 0;
+}
+
+void mutual_exclusion() {
+    cout << "mutual_exclusion... ", cout.flush();
+    logs.clear();
+    shared_data = 0;
+
+    rwl.rlock();
+
+    pthread_t w;
+    pthread_create(&w, NULL, writer, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    rwl.runlock();
+
+    usleep(10000);
+
+    assert(logs.size() == 1);
+    assert(logs[0].type == Write);
+    assert(logs[0].data_value == 1);
+
+    rwl.wlock();
+
+    pthread_t r;
+    pthread_create(&r, NULL, reader, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 1);
+
+    rwl.wunlock();
+
+    pthread_join(w, NULL);
+    pthread_join(r, NULL);
+
+    assert(logs.size() == 2);
+    assert(logs[1].type == Read);
+    assert(logs[1].data_value == 1);
+
+    cout << "passed" << endl;
+}
+
+void multiple_readers() {
+    cout << "multiple_readers... ", cout.flush();
+    rwl.rlock();
+    rwl.rlock();
+
+    rwl.runlock();
+    rwl.runlock();
+ 
+    assert(true);
+
+    cout << "passed" << endl;
+}
+
+void single_writer() {
+    cout << "single_writer... ", cout.flush();
+    logs.clear();
+    shared_data = 4;
+    rwl.wlock();
+
+    pthread_t w;
+    pthread_create(&w, NULL, writer, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    rwl.wunlock();
+
+    pthread_join(w, NULL);
+
+    assert(logs.size() == 1);
+    assert(logs[0].type == Write);
+    assert(logs[0].data_value == 5);
+
+    cout << "passed" << endl;
+}
+
+void starvation_free() {
+    cout << "starvation_free... ", cout.flush();
+    logs.clear();
+    shared_data = 0;
+
+    rwl.rlock();
+
+    pthread_t w1;
+    pthread_create(&w1, NULL, writer, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    pthread_t r1;
+    pthread_create(&r1, NULL, reader, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    pthread_t w2;
+    pthread_create(&w2, NULL, writer, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    pthread_t r2;
+    pthread_create(&r2, NULL, reader, NULL);
+
+    usleep(10000);
+
+    assert(logs.size() == 0);
+
+    rwl.runlock();
+   
+    pthread_join(w1, NULL);
+    pthread_join(w2, NULL);
+    pthread_join(r1, NULL);
+    pthread_join(r2, NULL);
+ 
+    assert(logs.size() == 4);
+    assert(logs[0].type == Write);
+    assert(logs[0].data_value == 1);
+    assert(logs[1].type == Write);
+    assert(logs[1].data_value == 2);
+    assert(logs[2].type == Read);
+    assert(logs[2].data_value == 2);
+    assert(logs[3].type == Read);
+    assert(logs[3].data_value == 2);
+
+    cout << "passed" << endl;
+}
+
+void general_test() {
+    cout << "general_test... ", cout.flush();
+    logs.clear();
+    shared_data = 0;
+    unsigned int thread_count = 4000;
+    pthread_t threads[thread_count];
+   
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    srand((time_t)ts.tv_nsec);
+
+
+    for(unsigned int i = 0; i < thread_count; i++)
+        pthread_create(&threads[i], NULL, rand() % 2 ? reader : writer, NULL); 
+   
+
+    for(unsigned int i = 0; i < thread_count; i++)
+        pthread_join(threads[i], NULL);
+
+    unsigned int assert_data = 0;
+    assert(logs.size() == thread_count);
+   
+    for(unsigned int i = 0; i < thread_count; i++) {
+        if(logs[i].type == Write) {
+            assert_data++;
+            assert(logs[i].type == Write);
+        }
+        else
+            assert(logs[i].type == Read);
+
+        assert(logs[i].data_value ==  assert_data);
+    }
+    cout << "passed" << endl;
+}
+
+void starvation_free_bigger() {
+    cout << "starvation_free_bigger... ", cout.flush();
+    logs.clear();
+    shared_data = 0;
+
+    unsigned int initial_simultaneous_readers_count = 2500;
+    unsigned int writer_thread_count = 1000;
+    unsigned int reader_thread_count = 8000;
+    pthread_t w_threads[writer_thread_count];
+    pthread_t r_threads[reader_thread_count];
+   
+
+    for(unsigned int i = 0; i < initial_simultaneous_readers_count; i++)
+        rwl.rlock();
+
+    // garantizamos el primer wlock, o los el primer thread podria ser de
+    // lectura
+    pthread_create(&w_threads[0], NULL, writer, NULL);
+    usleep(10000);
+
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    srand((time_t)ts.tv_nsec);   
+
+    unsigned int j, k;
+    for(j = 1, k = 0; j + k < writer_thread_count + reader_thread_count;) {
+        if(j < writer_thread_count && rand() % 2 == 0) {
+           pthread_create(&w_threads[j], NULL, writer, NULL);
+           j++;
+        }
+        else {
+           pthread_create(&r_threads[k], NULL, reader, NULL);
+           k++;
+        }
+    }
+
+    usleep(500000);
+
+    for(unsigned int i = 0; i < initial_simultaneous_readers_count; i++)
+        rwl.runlock();
+
+    for(unsigned int i = 0; i < writer_thread_count; i++)
+        pthread_join(w_threads[i], NULL);
+
+    for(unsigned int i = 0; i < reader_thread_count; i++)
+        pthread_join(r_threads[i], NULL);
+
+    unsigned int assert_data = 0;
+    assert(logs.size() == writer_thread_count + reader_thread_count);
+   
+    for(unsigned int i = 0; i < writer_thread_count + reader_thread_count; i++) {
+        if(i < writer_thread_count) {
+            assert_data++;
+            assert(logs[i].type == Write);
+        }
+        else
+            assert(logs[i].type == Read);
+
+        assert(logs[i].data_value ==  assert_data);
+    }
+    cout << " passed" << endl;
+}
+
+void * reader(void * data) {
+    log l;
+    l.type = Read;
+
+    rwl.rlock();
+    l.data_value = shared_data;
+
+    pthread_mutex_lock(&logs_mutex);
+    logs.push_back(l);
+    pthread_mutex_unlock(&logs_mutex);
+
+    rwl.runlock();
+    pthread_exit(NULL);
+}
+
+
+void * writer(void * data) {
+    log l;
+    l.type = Write;
+
+    rwl.wlock();
+    l.data_value = ++shared_data;
+
+    pthread_mutex_lock(&logs_mutex);
+    logs.push_back(l);
+    pthread_mutex_unlock(&logs_mutex);
+    rwl.wunlock();
+    
+    pthread_exit(NULL);
 }

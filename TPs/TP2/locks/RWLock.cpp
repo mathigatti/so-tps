@@ -1,67 +1,74 @@
 #include "RWLock.h"
 
-RWLock::RWLock() : reading(0), writing(0), writers(0) {
-    pthread_mutex_init(&m, NULL);
-    pthread_cond_init(&turn, NULL);
+RWLock :: RWLock() {
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&condition, NULL);
+    readers = 0;
+    writers = 0;
+    writing = false;
 }
 
-void RWLock::rlock() {
-    pthread_mutex_lock(&m);
-
-    // Esperemos que todos los writers hayan terminado
-    while(writers) {
-        pthread_cond_wait(&turn, &m);
-    }
-
-    // Esperamos a que no haya mas gente escribiendo
-    while(writing) {
-        pthread_cond_wait(&turn, &m);
-    }
-
-    // Ya podemos leer
-    reading++;
-    pthread_mutex_unlock(&m);
+RWLock :: ~RWLock() {
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&condition);
 }
 
-void RWLock::wlock() {
-    pthread_mutex_lock(&m);
+void RWLock :: rlock() {
+    lock();
+    while(writers > 0)
+        // esperamos a que terminen los escritores;
+        wait();
+    readers++;
+    unlock();
+}
 
-    // Esperemos que todos los writers anteriores hayan terminado
-    while(writers) {
-        pthread_cond_wait(&turn, &m);
-    }
+void RWLock :: runlock() {
+    lock();
+    readers--;
+    if(readers == 0)
+        // notificamos a un escritor, si hay alguno
+        signal();
+    unlock();
+}
 
+void RWLock :: wlock() {
+    lock();
     writers++;
-
-    // Esperamos a que no haya mas gente tocando la estructura
-    while(reading or writing) {
-        pthread_cond_wait(&turn, &m);
-    }
-
-    // Ya podemos escribir
-    writing++;
-    pthread_mutex_unlock(&m);
+    while (writing || readers > 0)
+        // esperamos a que nos notifique el escritor actual
+        // o el ultimo lector
+        wait();
+    writing = true;
+    unlock();
 }
 
-void RWLock::runlock() {
-    pthread_mutex_lock(&m);
-
-    // Terminamos de leer
-    reading--;
-
-    // Avisarle a todos los writers que estén esperando
-    pthread_cond_broadcast(&turn);
-    pthread_mutex_unlock(&m);
-}
-
-void RWLock::wunlock() {
-    pthread_mutex_lock(&m);
-
-    // Terminamos de escribir
-    writing--;
+void RWLock :: wunlock() {
+    lock();
     writers--;
+    writing = false;
+    // avisamos a todos
+    // si hay escritores sigue alguno
+    // y los lectores vuelven a dormir
+    broadcast();
+    unlock();
+}
 
-    // Avisarle a todos los readers y writers que estén esperando
-    pthread_cond_broadcast(&turn);
-    pthread_mutex_unlock(&m);
+void RWLock :: lock() {
+    pthread_mutex_lock(&mutex);
+}
+
+void RWLock :: unlock() {
+    pthread_mutex_unlock(&mutex);
+}
+
+void RWLock :: wait() {
+    pthread_cond_wait(&condition, &mutex);
+}
+
+void RWLock :: signal() {
+    pthread_cond_signal(&condition);
+}
+
+void RWLock :: broadcast() {
+    pthread_cond_broadcast(&condition);
 }
