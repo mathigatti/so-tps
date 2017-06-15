@@ -1,5 +1,7 @@
 #include "ConcurrentHashMap.h"
 
+// No usar rwlock, usar mutex comunes, una lista, que addAndInc pida segun corresponde en el indice de la lista y que maximum pida todos antes de comenzar.
+
 RWLock locks_lista[CANT_ENTRADAS];
 RWLock rw_lock;
 RWLock rw_lock_ej4;
@@ -45,6 +47,8 @@ void* count_words_aux2(void* data){
 
     string arch;
     while(proximo < size){
+        //estaria mejor usar un atomic int y ver de que no sea una lista de estructuras todas iguales
+
         rw_lock_ej4.wlock();
         unsigned int next_available = *(words_data->next_available);
         proximo = next_available;
@@ -202,7 +206,6 @@ deberá haber locking a nivel de cada elemento del array.
 
 void ConcurrentHashMap::addAndInc(string key){
 
-    rw_lock.wlock();
     
     /** obtenemos acceso a la lista correspondiente y la lockeamos **/
     int index = fHash(key[0]);

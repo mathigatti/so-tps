@@ -27,6 +27,8 @@ public:
 	}
 
 	void push_front(const T& val) {
+		// ver que exchange y asignacion de nodo->next sean atomicos, hay una funcion que lo podria resolver atomic_compare_exchange_weak
+		// http://www.cplusplus.com/reference/atomic/atomic_compare_exchange_weak/
 		Nodo* nodo = new Nodo(val);
 		Nodo* aux = _head.exchange(nodo);
 		nodo->_next = aux;
