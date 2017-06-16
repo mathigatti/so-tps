@@ -201,13 +201,13 @@ void ConcurrentHashMap::addAndInc(string key){
     /** agregamos o incrementamos segun corresponda **/
     bool pertenece = false;
     for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
-        auto t = it.Siguiente();
+        pair<string, unsigned int>& t = it.Siguiente();
         if(t.first == key){
-            pair<string, unsigned int> newValue = make_pair(key,t.second + 1);
-            tabla[index]->update(t,newValue);       // ** SI OBTENEMOS LA REFERENCIA.. NO DEBERIAMOS INCREMENTAR EL PAR DE UNA? **
+            t.second++;
             pertenece = true;
         }
-    }   
+    }
+
     if(!pertenece){
         pair<string, unsigned int> value = make_pair(key,1);
         tabla[index]->push_front(value);
