@@ -27,11 +27,17 @@ public:
 	}
 
 	void push_front(const T& val) {
-		// ver que exchange y asignacion de nodo->next sean atomicos, hay una funcion que lo podria resolver atomic_compare_exchange_weak
-		// http://www.cplusplus.com/reference/atomic/atomic_compare_exchange_weak/
-		Nodo* nodo = new Nodo(val);
-		Nodo* aux = _head.exchange(nodo);
-		nodo->_next = aux;
+		/*
+		atomic_compare_exchange_weak(atomicObject,nonAtomic,)
+		It atomically compares the value of the
+		atomic object with non-atomic argument
+		and performs atomic exchange if equal or
+		atomic load if not.
+		*/
+		Nodo* nuevo_nodo = new Nodo(val);
+		Nodo* head = _head.load();
+	    nuevo_nodo->_next = head;
+	    while (!std::atomic_compare_exchange_weak(&_head, &head, nuevo_nodo));
 	}
 
 	T& front() const {
