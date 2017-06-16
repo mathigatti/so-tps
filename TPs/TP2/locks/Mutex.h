@@ -9,8 +9,8 @@ class Mutex {
 	pthread_mutex_t mutex;
 	
     public:
-    RWLock();
-    ~RWLock();
+    Mutex();
+    ~Mutex();
     void lock();
 	void unlock();
 };

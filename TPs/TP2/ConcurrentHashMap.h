@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <list>
-#include "locks/RWLock.h"
+#include "locks/Mutex.h"
 
 #define CANT_ENTRADAS 26
 

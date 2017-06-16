@@ -2,9 +2,8 @@
 
 // No usar rwlock, usar mutex comunes, una lista, que addAndInc pida segun corresponde en el indice de la lista y que maximum pida todos antes de comenzar.
 
-RWLock locks_lista[CANT_ENTRADAS];
-RWLock rw_lock;
-RWLock rw_lock_ej4;
+Mutex locks_lista[CANT_ENTRADAS];
+Mutex rw_lock_ej4;
 
 struct Count_words_data{
     ConcurrentHashMap* h;
@@ -22,8 +21,8 @@ struct Multithreading_data{
 
     Lista<pair<string, unsigned int> >::Iterador iterador_siguiente_nodo;
     Lista<pair<string, unsigned int> > **tabla;
-    RWLock lock_iterador;
-    RWLock lock_valor_maximo;
+    Mutex lock_iterador;
+    Mutex lock_valor_maximo;
 };
 
 string iesimo(list<string>archs, int iesimo){
@@ -49,11 +48,11 @@ void* count_words_aux2(void* data){
     while(proximo < size){
         //estaria mejor usar un atomic int y ver de que no sea una lista de estructuras todas iguales
 
-        rw_lock_ej4.wlock();
+        rw_lock_ej4.lock();
         unsigned int next_available = *(words_data->next_available);
         proximo = next_available;
         (*(words_data->next_available))++;
-        rw_lock_ej4.wunlock();
+        rw_lock_ej4.unlock();
 
         if(proximo < size){
             arch = iesimo((words_data->archs),proximo);
@@ -68,7 +67,7 @@ void* maximumInternal(void* multithreading_data) {
 
     while(data->iterador_siguiente_nodo.HaySiguiente()){
         // lockeo para leer que dato voy a trabajar
-        data->lock_iterador.wlock();
+        data->lock_iterador.lock();
 
         if(data->iterador_siguiente_nodo.HaySiguiente()){
             // obtengo el dato y actualizo el iterador global para que se siga procesando en paralelo
@@ -91,17 +90,17 @@ void* maximumInternal(void* multithreading_data) {
             unsigned int value = par_actual.second;
 
             // pido el recurso del max actual para actualizarlo de ser necesario
-            data->lock_valor_maximo.wlock();
+            data->lock_valor_maximo.lock();
             if(data->max_value < value){
                 data->max_value = value;
                 data->max_key = key;
             }
 
-            data->lock_valor_maximo.wunlock();
+            data->lock_valor_maximo.unlock();
 
         }
 
-        data->lock_iterador.wunlock();
+        data->lock_iterador.unlock();
 
     }
     pthread_exit(NULL);     // UFF..! :B
@@ -204,12 +203,10 @@ void addAndInc(string key): Si key existe, incrementa su valor, si no existe, cr
 deberá haber locking a nivel de cada elemento del array.
 */
 
-void ConcurrentHashMap::addAndInc(string key){
-
-    
+void ConcurrentHashMap::addAndInc(string key){    
     /** obtenemos acceso a la lista correspondiente y la lockeamos **/
     int index = fHash(key[0]);
-    locks_lista[index].wlock();
+    locks_lista[index].lock();
     
     /** agregamos o incrementamos segun corresponda **/
     bool pertenece = false;
@@ -226,9 +223,8 @@ void ConcurrentHashMap::addAndInc(string key){
         tabla[index]->push_front(value);
     }
     /** habilitamos acceso a la lista para otros threads que hagan addAndInc() **/
-    locks_lista[index].wunlock();
+    locks_lista[index].unlock();
 
-    rw_lock.wunlock();
 }
 
 /*
@@ -256,8 +252,8 @@ array. Si no tienen filas por procesar terminarán su ejecución.
 */
 pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
 
-    RWLock lock_iterador;
-    RWLock lock_valor_maximo;
+    Mutex lock_iterador;
+    Mutex lock_valor_maximo;
 
     Multithreading_data* data = new Multithreading_data();
     data->iterador_siguiente_nodo = tabla[0]->CrearIt();
@@ -265,8 +261,9 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
     data->lock_iterador = lock_iterador;
     data->lock_valor_maximo = lock_valor_maximo;
 
-    rw_lock.rlock();
-
+    for(int i = 0; i < 26; i++){
+        locks_lista[i].lock();
+    }
     for(int i=1; i<CANT_ENTRADAS && not data->iterador_siguiente_nodo.HaySiguiente(); i++){
         data->iterador_siguiente_nodo = tabla[i]->CrearIt();
         data->index_fila_actual=i;
@@ -285,7 +282,9 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
             pthread_join(pthrds[t], NULL);
     }
 
-    rw_lock.runlock();
+    for(int i = 0; i < 26; i++){
+        locks_lista[i].unlock();
+    }
 
     return make_pair(data->max_key, data->max_value);
 }
