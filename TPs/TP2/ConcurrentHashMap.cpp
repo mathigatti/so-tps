@@ -1,14 +1,11 @@
 #include "ConcurrentHashMap.h"
 
-// No usar rwlock, usar mutex comunes, una lista, que addAndInc pida segun corresponde en el indice de la lista y que maximum pida todos antes de comenzar.
-
 Mutex locks_lista[CANT_ENTRADAS];
-Mutex rw_lock_ej4;
 
 struct Count_words_data{
     ConcurrentHashMap* h;
     string file;
-    unsigned int* next_available;
+    std::atomic_uint* next_available;
     list<string>archs;
 };
 
@@ -42,22 +39,17 @@ void* count_words_aux(void* data){
 void* count_words_aux2(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     int size = (words_data->archs).size();
-    unsigned int proximo = 0;
+    std::atomic_uint* next_available = words_data->next_available;
 
+    unsigned int proximo = next_available->fetch_add(1);
     string arch;
+
     while(proximo < size){
-        //estaria mejor usar un atomic int y ver de que no sea una lista de estructuras todas iguales
-
-        rw_lock_ej4.lock();
-        unsigned int next_available = *(words_data->next_available);
-        proximo = next_available;
-        (*(words_data->next_available))++;
-        rw_lock_ej4.unlock();
-
         if(proximo < size){
             arch = iesimo((words_data->archs),proximo);
             ConcurrentHashMap::count_words(arch,words_data->h);
         }
+        proximo = next_available->fetch_add(1);
     }
 }
 
@@ -105,7 +97,6 @@ void* maximumInternal(void* multithreading_data) {
     }
     pthread_exit(NULL);     // UFF..! :B
 }
-
 
 ConcurrentHashMap::ConcurrentHashMap(){
     tabla = new Lista<pair<string, unsigned int> >*[CANT_ENTRADAS];
@@ -174,18 +165,17 @@ list<string>archs){
     int size = archs.size();
     pthread_t pthrds[n];
 
+    Count_words_data data;
+    data.archs = archs;
     ConcurrentHashMap h;
-
-    Count_words_data data[n];
+    data.h = &h;
+    std::atomic_uint next_available;
+    next_available.store(0);
+    data.next_available = &next_available;
 
     int i = 0;
-
-    unsigned int next_available = 0;
-    for (auto it = archs.begin(); it != archs.end() && i < n; ++it){
-        data[i].h = &h;
-        data[i].next_available = &next_available;
-        data[i].archs = archs;
-        pthread_create(&pthrds[i], NULL, count_words_aux2, &data[i]);
+    for (auto it = archs.begin(); i < n && it != archs.end(); ++it){
+        pthread_create(&pthrds[i], NULL, count_words_aux2, &data);
         i++;
     }
 
