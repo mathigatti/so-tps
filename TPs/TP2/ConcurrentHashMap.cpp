@@ -206,10 +206,12 @@ void* maximum_aux(void* data){
     while(proximo < size){
         // lo obtenemos
         arch = iesimo((m_data->archs),proximo);
+
+        // obtenemos el array de mapas (un mapa por archivo)
         ConcurrentHashMap* chMaps = m_data->chMaps;
 
         // y creamos su CHMap asociado
-        ConcurrentHashMap::count_words(arch, chMaps+iesimo);
+        ConcurrentHashMap::count_words(arch, chMaps+proximo);
         proximo = next_available->fetch_add(1);
     }
 }
@@ -224,7 +226,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
     
     Maximum_data m_data;
     m_data.chMaps = chMaps;
-    m_data.next_available = next_available;
+    m_data.next_available = &next_available;
     m_data.archs = archs;
 
     /** leemos los archivos, un thread por archivo - asumimos p_archivos <= |archs| **/
@@ -234,7 +236,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
     }
 
     /** joineamos para esperar que terminen **/
-    for(int t=0; t<n; t++){
+    for(int t = 0; t < p_archivos; t++){
         pthread_join(pthrds_files[t], NULL);
     }
 
