@@ -9,6 +9,7 @@ struct Count_words_data{
     list<string>archs;
 };
 
+
 struct Multithreading_data{
     Multithreading_data() : max_key("Lista Vacia"), max_value(0), index_fila_actual(0) {} 
 
@@ -185,6 +186,94 @@ list<string>archs){
 
     return h;
 
+}
+
+struct Maximum_data{
+    ConcurrentHashMap* chMaps;
+    std::atomic_uint* next_available;
+    list<string>archs;
+};
+
+void* maximum_aux(void* data){
+    Maximum_data* m_data = (Maximum_data*) data;
+    int size = (m_data->archs).size();
+    std::atomic_uint* next_available = m_data->next_available;
+
+    unsigned int proximo = next_available->fetch_add(1);    // fetch_add: aumenta y retorna el valor precargado
+    string arch;
+
+    // mientras haya algun archivo a procesar
+    while(proximo < size){
+        // lo obtenemos
+        arch = iesimo((m_data->archs),proximo);
+
+        // obtenemos el array de mapas (un mapa por archivo)
+        ConcurrentHashMap* chMaps = m_data->chMaps;
+
+        // y creamos su CHMap asociado
+        ConcurrentHashMap::count_words(arch, chMaps+proximo);
+        proximo = next_available->fetch_add(1);
+    }
+}
+
+pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, unsigned int p_maximos, list<string> archs){
+
+    /** inicializamos estructuras **/
+    pthread_t pthrds_files[p_archivos];
+    ConcurrentHashMap chMaps[archs.size()];
+    std::atomic_uint next_available;
+    next_available.store(0);
+    
+    Maximum_data m_data;
+    m_data.chMaps = chMaps;
+    m_data.next_available = &next_available;
+    m_data.archs = archs;
+
+    /** leemos los archivos, un thread por archivo - asumimos p_archivos <= |archs| **/
+    for (int i = 0; i < p_archivos; i++){
+        pthread_create(&pthrds_files[i], NULL, maximum_aux, &m_data);
+        i++;
+    }
+
+    /** joineamos para esperar que terminen **/
+    for(int t = 0; t < p_archivos; t++){
+        pthread_join(pthrds_files[t], NULL);
+    }
+
+    /** los mergeamos al 1er mapa **/
+    ConcurrentHashMap fullMap = chMaps[0];
+
+    for(int i = 1; i < p_archivos; i++){
+        // obtenemos el mapa a mergear
+        ConcurrentHashMap itMap = chMaps[i];
+
+        // iteramos cada una de sus listas
+        for(int index = 0; index < 26; index++){
+            for (auto itList = itMap.tabla[index]->CrearIt(); itList.HaySiguiente(); itList.Avanzar()) {
+                pair<string, unsigned int>& t_merge = itList.Siguiente();
+                
+                // por cada palabra a mergear, chequeamos si existe iterando la lista correspondiente
+                bool esMiembro = false;
+                for (auto itFullList = fullMap.tabla[index]->CrearIt(); itFullList.HaySiguiente() && !esMiembro; itFullList.Avanzar()) {
+                    pair<string, unsigned int>& t_actual = itFullList.Siguiente();
+
+                    // si pertenece le sumamos el valor
+                    if(t_actual.first == t_merge.first){
+                        t_actual.second += t_merge.second;
+                        esMiembro = true;
+                    }
+                }
+
+                // si no pertenece lo agregamos a la lista
+                if(!esMiembro){
+                    fullMap.tabla[index]->push_front(t_merge);
+                }
+            }
+        }
+    }
+
+    /** calculamos el maximo y lo retornamos **/
+    return fullMap.maximum(p_maximos);
 }
 
 /*

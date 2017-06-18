@@ -20,6 +20,7 @@ class ConcurrentHashMap {
     static ConcurrentHashMap count_words_ej4(unsigned int n,
 list<string>archs);
     static ConcurrentHashMap count_words(string arch, ConcurrentHashMap* h);
+    static pair<string, unsigned int> maximum(unsigned int p_archivos, unsigned int p_maximos, list<string> archs);
 
     void addAndInc(string key);
     bool member(string key);
