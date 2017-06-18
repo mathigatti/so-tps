@@ -276,6 +276,16 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
     return fullMap.maximum(p_maximos);
 }
 
+
+pair<string, unsigned int> ConcurrentHashMap::maximum_ej6(unsigned int p_archivos, unsigned int p_maximos, list<string> archs){
+
+    ConcurrentHashMap h = count_words_ej4(p_archivos, archs);
+
+    return h.maximum(p_maximos);
+
+}
+
+
 /*
 void addAndInc(string key): Si key existe, incrementa su valor, si no existe, crea el par
 (key, 1). Se debe garantizar que sólo haya contención en caso de colisión de hash. Esto es,
