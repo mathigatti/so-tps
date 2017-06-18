@@ -243,7 +243,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
     /** los mergeamos al 1er mapa **/
     ConcurrentHashMap fullMap = chMaps[0];
 
-    for(int i = 1; i < p_archivos; i++){
+    for(int i = 1; i < archs.size(); i++){
         // obtenemos el mapa a mergear
         ConcurrentHashMap itMap = chMaps[i];
 
