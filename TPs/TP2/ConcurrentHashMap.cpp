@@ -35,6 +35,7 @@ string iesimo(list<string>archs, int iesimo){
 void* count_words_aux(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     ConcurrentHashMap::count_words(words_data->file,words_data->h);
+    pthread_exit(NULL); 
 }
 
 void* count_words_aux2(void* data){
@@ -52,6 +53,7 @@ void* count_words_aux2(void* data){
         }
         proximo = next_available->fetch_add(1);
     }
+    pthread_exit(NULL); 
 }
 
 void* maximumInternal(void* multithreading_data) {
@@ -67,7 +69,7 @@ void* maximumInternal(void* multithreading_data) {
             pair<string, unsigned int> par_actual = data->iterador_siguiente_nodo.Siguiente();
             data->iterador_siguiente_nodo.Avanzar();
 
-            if(not data->iterador_siguiente_nodo.HaySiguiente()){
+            if(not data->iterador_siguiente_nodo.HaySiguiente() and data->index_fila_actual != CANT_ENTRADAS - 1){
                 // hay que buscar en otra letra (fila)
                 data->index_fila_actual++;
                 data->iterador_siguiente_nodo = (data->tabla[data->index_fila_actual])->CrearIt();
@@ -112,7 +114,7 @@ ConcurrentHashMap::ConcurrentHashMap(const ConcurrentHashMap& aCopiar){
       tabla[i] = new Lista<pair<string, unsigned int> >;
     }
 
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < CANT_ENTRADAS; i++) {
         for (auto it = aCopiar.tabla[i]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
             auto t = it.Siguiente();
             pair<string, unsigned int> value = make_pair(t.first,t.second);
@@ -214,6 +216,8 @@ void* maximum_aux(void* data){
         ConcurrentHashMap::count_words(arch, chMaps+proximo);
         proximo = next_available->fetch_add(1);
     }
+
+    pthread_exit(NULL); 
 }
 
 pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, unsigned int p_maximos, list<string> archs){
@@ -248,7 +252,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
         ConcurrentHashMap itMap = chMaps[i];
 
         // iteramos cada una de sus listas
-        for(int index = 0; index < 26; index++){
+        for(int index = 0; index < CANT_ENTRADAS; index++){
             for (auto itList = itMap.tabla[index]->CrearIt(); itList.HaySiguiente(); itList.Avanzar()) {
                 pair<string, unsigned int>& t_merge = itList.Siguiente();
                 
@@ -350,7 +354,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
     data->lock_iterador = lock_iterador;
     data->lock_valor_maximo = lock_valor_maximo;
 
-    for(int i = 0; i < 26; i++){
+    for(int i = 0; i < CANT_ENTRADAS; i++){
         locks_lista[i].lock();
     }
     for(int i=1; i<CANT_ENTRADAS && not data->iterador_siguiente_nodo.HaySiguiente(); i++){
@@ -371,7 +375,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
             pthread_join(pthrds[t], NULL);
     }
 
-    for(int i = 0; i < 26; i++){
+    for(int i = 0; i < CANT_ENTRADAS; i++){
         locks_lista[i].unlock();
     }
 

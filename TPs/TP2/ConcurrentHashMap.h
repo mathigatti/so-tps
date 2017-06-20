@@ -7,7 +7,7 @@
 #include <list>
 #include "locks/Mutex.h"
 
-#define CANT_ENTRADAS 27
+#define CANT_ENTRADAS 26
 
 using namespace std;
 
