@@ -236,7 +236,7 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int p_archivos, u
     /** leemos los archivos, un thread por archivo - asumimos p_archivos <= |archs| **/
     for (int i = 0; i < p_archivos; i++){
         pthread_create(&pthrds_files[i], NULL, maximum_aux, &m_data);
-        i++;
+        //i++;
     }
 
     /** joineamos para esperar que terminen **/
