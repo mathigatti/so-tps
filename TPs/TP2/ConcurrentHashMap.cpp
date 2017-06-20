@@ -370,7 +370,6 @@ pair<string, unsigned int> ConcurrentHashMap::maximum(unsigned int nt){
             pthread_create(&pthrds[t], NULL, maximumInternal, data);
         }
         /** espero que terminen los threads de correr **/
-        void* status = NULL;
         for(int t=0; t<nt; t++)
             pthread_join(pthrds[t], NULL);
     }

@@ -6,7 +6,7 @@ CXX = g++
 CXXFLAGS = -std=c++11
 LDLIBS = -lpthread
 
-BIN = test-1 test-2 test-3 test-4 test-5
+BIN = test-1 test-2 test-3 test-4 test-5 test-6
 OBJ = ConcurrentHashMap.o locks/Mutex.o
 
 all: $(BIN)
