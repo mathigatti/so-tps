@@ -99,6 +99,18 @@ tiempos3: $(OBJ) tiempos3.cpp
 tiempos3-run: tiempos3
 			./tiempos3 5 5
 
+generar-palabras1: $(OBJ) generarPalabras1.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ generarPalabras1.cpp $(LDLIBS)
+	
+generar-palabras-1-run: ./generarPalabras1
+			./generarPalabras1 100000
+
+generar-palabras2: $(OBJ) generarPalabras2.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ generarPalabras2.cpp $(LDLIBS)
+	
+generar-palabras-2-run: ./generarPalabras2
+			./generarPalabras2 1000000
+
 clean:
 	rm -f $(BIN) $(OBJ)
 	rm -f corpus-*
