@@ -81,6 +81,25 @@ test-z: $(OBJ) test-z.cpp
 test-z-run: test-z
 			./test-z
 
+tiempos1: $(OBJ) tiempos1.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ tiempos1.cpp $(LDLIBS)
+	
+tiempos1-run: tiempos1
+			./tiempos1 26 26
+
+tiempos2: $(OBJ) tiempos2.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ tiempos2.cpp $(LDLIBS)
+	
+tiempos2-run: tiempos2
+			./tiempos2 26 26
+
+tiempos3: $(OBJ) tiempos3.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ tiempos3.cpp $(LDLIBS)
+	
+tiempos3-run: tiempos3
+			./tiempos3 5 5
+
 clean:
 	rm -f $(BIN) $(OBJ)
 	rm -f corpus-*
+
