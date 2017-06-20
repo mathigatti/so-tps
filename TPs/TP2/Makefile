@@ -75,6 +75,11 @@ test-6-run: test-6
 	done; done
 	rm -f corpus-max corpus-[0-4]
 
+test-z: $(OBJ) test-z.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-z.cpp $(LDLIBS)
+	
+test-z-run: test-z
+			./test-z
+
 clean:
 	rm -f $(BIN) $(OBJ)
-	rm -f corpus-*
