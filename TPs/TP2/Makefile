@@ -83,3 +83,4 @@ test-z-run: test-z
 
 clean:
 	rm -f $(BIN) $(OBJ)
+	rm -f corpus-*
