@@ -69,6 +69,16 @@ int main(void) {
 	assert(maximo.first=="a");
 	assert(maximo.second==3);
 
+	ConcurrentHashMap hz;
+	printf("\tTESTEANDO CONCURRENT_HASH_MAP CON LA Z...\n");
+	hz.addAndInc("zumo");
+	maximo = hz.maximum(1);
+	assert(maximo.first=="zumo");
+
+	printf("TODOS LOS TESTS PASARON EXITOSAMENTE\n");
+
+
+
 	printf("\tTODOS LOS TESTS PASARON EXITOSAMENTE\n");
 
 	printf("TESTS DE CONCURRENCIA\n");
