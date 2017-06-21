@@ -109,7 +109,7 @@ generar-palabras2: $(OBJ) generarPalabras2.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ generarPalabras2.cpp $(LDLIBS)
 	
 generar-palabras-2-run: ./generarPalabras2
-			./generarPalabras2 1000000
+			./generarPalabras2 1000
 
 clean:
 	rm -f $(BIN) $(OBJ)

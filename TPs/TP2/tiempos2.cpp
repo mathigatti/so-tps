@@ -41,17 +41,18 @@ int main(int argc, char **argv) {
  					 	"palabrasCaso2.24", "palabrasCaso2.25",};
 	
 
-	vector<double> tiempos3(50);
+	vector<double> tiempos3(10);
 
-	for (int i = 0; i < 50; ++i){
+	for (int i = 0; i < 10; ++i){
 		init_time();
 		p = ConcurrentHashMap::maximum(atoi(argv[1]), atoi(argv[2]), l2);
 		tiempos3[i] = get_time();
+		cout<<i<<endl;
 	}
 
   	ofstream salida2("resultadoCaso2",std::ofstream::out);
-  	salida2<<"Tiempos de ejecucion del caso 2 (50 corridas) - No concurrente: "<<endl;
-  	for (int i = 0; i < 50; ++i){
+  	salida2<<"Tiempos de ejecucion del caso 2 (10 corridas) - No concurrente: "<<endl;
+  	for (int i = 0; i < 10; ++i){
  		salida2<<tiempos3[i]<<endl;
   	}
 
@@ -65,16 +66,17 @@ int main(int argc, char **argv) {
 
   	salida2<<endl;
 
-  	vector<double> tiempos4(50);
+  	vector<double> tiempos4(10);
 
-	for (int i = 0; i < 50; ++i){
+	for (int i = 0; i < 10; ++i){
 		init_time();
 		p = ConcurrentHashMap::maximum_ej6(atoi(argv[1]), atoi(argv[2]), l2);
 		tiempos4[i] = get_time();
+		cout<<i<<endl;
 	}
 
-  	salida2<<"Tiempos de ejecucion del caso 2 (50 corridas) - Concurrente: "<<endl;
-  	for (int i = 0; i < 50; ++i){
+  	salida2<<"Tiempos de ejecucion del caso 2 (10 corridas) - Concurrente: "<<endl;
+  	for (int i = 0; i < 10; ++i){
  		salida2<<tiempos4[i]<<endl;
   	}
 

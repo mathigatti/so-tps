@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
 
 	int cant_palabras = atoi(argv[1]);
 	string archivo = "palabrasCaso2.";
-	vector<string> palabras = { "arbol", "bebe", "casa", "dedo", "eidos", "fifa", "gato", "hizo",
-							"ira", "juli", "key", "los", "mana", "nana", "opa", "papa", "que",
-							"risa", "so", "tu", "uba", "vendetta", "wod", "xmen", "ylox", "zorro" };
+	vector<string> palabras = { "a", "b", "c", "d", "e", "f", "g", "h",
+							"i", "j", "k", "l", "m", "n", "o", "p", "q",
+							"r", "s", "t", "u", "v", "w", "x", "y", "z" };
 
 	for (int i = 0; i < 26; ++i){
 		ofstream salida(archivo + to_string(i),std::ofstream::out);
@@ -29,11 +29,11 @@ int main(int argc, char **argv) {
 
 			if(j != cant_palabras - 1){
 
-				salida<<palabras[i]<<endl;
+				salida<<palabras[i]+to_string(j + 1)<<endl;
 
 			}else{
 
-				salida<<palabras[i];
+				salida<<palabras[i]+to_string(j + 1);
 
 			}
 		}
