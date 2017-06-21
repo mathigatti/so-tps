@@ -25,6 +25,12 @@ test-1: $(OBJ) test-1.cpp
 test-1-run: test-1
 			./test-1
 
+test-2-mini: $(OBJ) test-2-mini.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-2-mini.cpp $(LDLIBS)
+	
+test-2-mini-run: test-2-mini
+			./test-2-mini
+
 test-2: $(OBJ) test-2.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-2.cpp $(LDLIBS)
 	
@@ -32,6 +38,12 @@ test-2-run: test-2
 	awk -f corpus.awk corpus | sort >corpus-post
 	./test-2 | sort | diff -u - corpus-post
 	rm -f corpus-post
+
+test-3-mini: $(OBJ) test-3-mini.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-3-mini.cpp $(LDLIBS)
+	
+test-3-mini-run: test-3-mini
+			./test-3-mini
 
 test-3: $(OBJ) test-3.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-3.cpp $(OBJ) $(LDLIBS)
@@ -42,6 +54,14 @@ test-3-run: test-3
 	for i in 0 1 2 3 4; do ./test-3 $$((i + 1)) | sort | diff -u - corpus-post; done
 	rm -f corpus-post corpus-[0-4]
 
+test-4-mini: $(OBJ) test-4-mini.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-4-mini.cpp $(LDLIBS)
+	
+test-4-mini-run: test-4-mini
+			./test-4-mini 4
+			./test-4-mini 3
+			./test-4-mini 2
+
 test-4: $(OBJ) test-4.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-4.cpp $(OBJ) $(LDLIBS)
 
@@ -50,6 +70,18 @@ test-4-run: test-4
 	for i in 0 1 2 3 4; do sed -n "$$((i * 500 + 1)),$$(((i + 1) * 500))p" corpus >corpus-"$$i"; done
 	for i in 0 1 2 3 4; do ./test-4 $$((i + 1)) | sort | diff -u - corpus-post; done
 	rm -f corpus-post corpus-[0-4]
+
+test-5-mini: $(OBJ) test-5-mini.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $@ test-5-mini.cpp $(LDLIBS)
+	
+test-5-mini-run: test-5-mini
+			./test-5-mini 4 4
+			./test-5-mini 6 2
+			./test-5-mini 5 1
+			./test-5-mini 1 1
+			./test-5-mini 8 8
+			./test-5-mini 2 2
+
 
 test-5: $(OBJ) test-5.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ test-5.cpp $(OBJ) $(LDLIBS)
