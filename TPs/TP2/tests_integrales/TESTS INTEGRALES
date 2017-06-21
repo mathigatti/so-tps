@@ -28,3 +28,5 @@ assert l1.max -> <perro,20>
 assert l2.max -> <perro,70>
 assert l3.max -> <gato,160>
 assert l4.max -> <zorro,200>
+
+TIP! Correr algún caso con menos threads que archivos, para chequear que los structs funquen bien en los thrds (ejemplo: l4 con p_archivos=2)
