@@ -9,6 +9,7 @@
 #include "consola.hpp"
 #include "HashMap.hpp"
 #include "mpi.h"
+#include "nodo.hpp"
 
 using namespace std;
 
@@ -33,7 +34,11 @@ static void load(list<string> params) {
 
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
-    // TODO: Implementar
+    int n = np;
+    char msg = 'q';
+    for (int i = 1; i<n ; i++){
+        MPI_Send(&msg,1,MPI_CHAR,i,TAG_QUIT,MPI_COMM_WORLD);
+    }
 }
 
 // Esta función calcula el máximo con todos los nodos
@@ -100,6 +105,7 @@ static bool procesar_comandos() {
         strncmp(first_param, CMD_SQUIT, sizeof(CMD_SQUIT))==0) {
 
         quit();
+        printf("Adios!\n");
         return true;
     }
 
