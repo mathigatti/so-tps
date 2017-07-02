@@ -24,32 +24,62 @@ static unsigned int np;
 
 // Crea un ConcurrentHashMap distribuido
 static void load(list<string> params) {
+    char msg[BUFFER_SIZE];
 
+    int i = 0;
     for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
-       // TODO: Implementar
+        strcpy(msg, (*it).c_str());
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i%(np-1)+1,TAG_LOAD,MPI_COMM_WORLD);
+        i++;
     }
 
-    cout << "La listá esta procesada" << endl;
+    cout << "La lista esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
-    int n = np;
-    char msg = 'q';
-    for (int i = 1; i<n ; i++){
-        MPI_Send(&msg,1,MPI_CHAR,i,TAG_QUIT,MPI_COMM_WORLD);
+    char msg[BUFFER_SIZE];
+    for (unsigned int i = 1; i<np ; i++){
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_QUIT,MPI_COMM_WORLD);
     }
 }
 
 // Esta función calcula el máximo con todos los nodos
 static void maximum() {
-    pair<string, unsigned int> result;
 
-    // TODO: Implementar
-    string str("a");
-    result = make_pair(str,10);
+    char msg[BUFFER_SIZE];
+    for (unsigned int i = 1; i<np; i++){
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_MAXIMUM,MPI_COMM_WORLD);
+    }
 
+    string str("La tabla esta vacia");
+    pair<string, unsigned int> result = make_pair(str,0);
+
+    int winner_rank = -1;
+    MPI_Status status;   // required variable for receive routines
+
+    unsigned int number;
+    for (unsigned int i = 1; i<np; i++){
+        MPI_Recv(&number,1,MPI_INT,i,TAG_MAXIMUM_NUMBER_RESPONSE,MPI_COMM_WORLD,&status);
+        printf("%d\n",number);
+        if(result.second < number){
+            result.second = number;
+            winner_rank = i;
+        }
+    }
+
+    MPI_Request request;   // required variable for non-blocking calls
+    MPI_Irecv(&msg,BUFFER_SIZE,MPI_CHAR,winner_rank,TAG_MAXIMUM_WORD_RESPONSE,MPI_COMM_WORLD,&request);
+    string word(msg);
+
+    result.first = word;
+
+    if(result.second == 0){
+        cout << "No hay maximo, la tabla esta vacía." << endl;
+    } else {
     cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
+    }
+
 }
 
 // Esta función busca la existencia de *key* en algún nodo
