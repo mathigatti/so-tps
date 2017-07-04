@@ -24,6 +24,12 @@ void nodo(unsigned int rank) {
             case TAG_MAXIMUM:
                 fin = nodeMaximum(h);
                 break;
+            case TAG_MEMBER:
+                fin = nodeMember(msg,h);
+                break;
+            case TAG_ADDANDINC:
+                fin = nodeAddAndInc(msg,h);
+                break;
     	}
 		trabajarArduamente();
     }
@@ -47,12 +53,36 @@ bool nodeLoad(char msg[], HashMap &h){
 
 // Esta mal, deberia devolver la palabra maxima entre todos los HashMaps mergeados
 bool nodeMaximum(HashMap &h){
-    pair<string, unsigned int> result = h.maximum();
-    MPI_Send(&result.second,1,MPI_INT,CONSOLE_RANK,TAG_MAXIMUM_NUMBER_RESPONSE,MPI_COMM_WORLD);
+    HashMap::iterator it = h.begin();
 
-    MPI_Request request;   // required variable for non-blocking calls
     char msg[BUFFER_SIZE];
-    strcpy(msg, (result.first).c_str());
-    MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_WORD_RESPONSE,MPI_COMM_WORLD,&request);
+
+    while(it != h.end()){
+        strcpy(msg, (*it).c_str());
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_WORD,MPI_COMM_WORLD);
+        it++;
+    }
+    trabajarArduamente();
+    MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_END,MPI_COMM_WORLD);
+    
+    return false;
+}
+
+bool nodeMember(char msg[], HashMap &h){
+    string str(msg);
+    bool esta = h.member(str);
+    MPI_Send(&esta,1,MPI_C_BOOL,CONSOLE_RANK,TAG_MEMBER,MPI_COMM_WORLD);
+    return false;
+}
+
+bool nodeAddAndInc(char msg[], HashMap &h){
+    string str(msg);
+    MPI_Send(NULL,0,MPI_C_BOOL,CONSOLE_RANK,TAG_ADDANDINC,MPI_COMM_WORLD);
+ 
+    bool ack;
+    MPI_Status status;   // required variable for receive routines
+
+    MPI_Recv(&ack,1,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_ADDANDINC_ACK,MPI_COMM_WORLD,&status);
+    if(ack) h.addAndInc(str);
     return false;
 }

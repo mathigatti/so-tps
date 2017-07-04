@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <cstring>
 #include <stdlib.h>
+#include <iostream>
+
+using namespace std;
 
 
 #define BUFFER_SIZE 1024
@@ -16,11 +19,9 @@
 #define TAG_ADDANDINC 2
 #define TAG_MEMBER 3
 #define TAG_MAXIMUM 4
-#define TAG_MAXIMUM_NUMBER_RESPONSE 5
-#define TAG_MAXIMUM_WORD_RESPONSE 6
-
-
-
+#define TAG_MAXIMUM_WORD 5
+#define TAG_MAXIMUM_END 6
+#define TAG_ADDANDINC_ACK 7
 
 #define CONSOLE_RANK 0
 
@@ -36,5 +37,7 @@ void trabajarArduamente();
 bool nodeQuit();
 bool nodeLoad(char msg[], HashMap &h);
 bool nodeMaximum(HashMap &h);
+bool nodeMember(char msg[], HashMap &h);
+bool nodeAddAndInc(char msg[], HashMap &h);
 
 #endif  /* _NODO_H */

@@ -47,55 +47,86 @@ static void quit() {
 // Esta función calcula el máximo con todos los nodos
 static void maximum() {
 
+    HashMap h;
+
     char msg[BUFFER_SIZE];
     for (unsigned int i = 1; i<np; i++){
         MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_MAXIMUM,MPI_COMM_WORLD);
     }
 
-    string str("La tabla esta vacia");
-    pair<string, unsigned int> result = make_pair(str,0);
-
-    int winner_rank = -1;
     MPI_Status status;   // required variable for receive routines
-
-    unsigned int number;
-    for (unsigned int i = 1; i<np; i++){
-        MPI_Recv(&number,1,MPI_INT,i,TAG_MAXIMUM_NUMBER_RESPONSE,MPI_COMM_WORLD,&status);
-        printf("%d\n",number);
-        if(result.second < number){
-            result.second = number;
-            winner_rank = i;
+    unsigned int acks = 0;
+    while(acks < np-1){ // Ya todos los que no son consola confirmaron que terminaron
+        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        if(status.MPI_TAG == TAG_MAXIMUM_END) {
+            acks++;
+        } if(status.MPI_TAG == TAG_MAXIMUM_WORD){
+            string word(msg);
+            h.addAndInc(word);
         }
     }
 
-    MPI_Request request;   // required variable for non-blocking calls
-    MPI_Irecv(&msg,BUFFER_SIZE,MPI_CHAR,winner_rank,TAG_MAXIMUM_WORD_RESPONSE,MPI_COMM_WORLD,&request);
-    string word(msg);
+    pair<string, unsigned int> result = h.maximum();
 
-    result.first = word;
-
-    if(result.second == 0){
-        cout << "No hay maximo, la tabla esta vacía." << endl;
-    } else {
     cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
-    }
 
 }
+
 
 // Esta función busca la existencia de *key* en algún nodo
 static void member(string key) {
     bool esta = false;
 
-    // TODO: Implementar
+    char msg[BUFFER_SIZE];
+    strcpy(msg, (key).c_str());
 
-    cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
+    for (unsigned int i = 1; i<np; i++){
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_MEMBER,MPI_COMM_WORLD);
+    }
+
+    unsigned int acks = 0;
+    MPI_Status status;   // required variable for receive routines
+
+    bool res = false;
+
+    while(acks < np-1){
+        MPI_Recv(&esta,1,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_MEMBER,MPI_COMM_WORLD,&status);
+        if(esta) res = esta;
+        acks++;
+    }
+
+    cout << "El string <" << key << (res ? ">" : "> no") << " está" << endl;
+    
 }
 
 
 // Esta función suma uno a *key* en algún nodo
 static void addAndInc(string key) {
+    char msg[BUFFER_SIZE];
+    strcpy(msg, (key).c_str());
 
-    // TODO: Implementar
+    for (unsigned int i = 1; i<np; i++){
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_ADDANDINC,MPI_COMM_WORLD);
+    }
+
+    MPI_Status status;   // required variable for receive routines
+    MPI_Recv(NULL,0,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_ADDANDINC,MPI_COMM_WORLD,&status);
+
+    bool ack = true;
+    MPI_Send(&ack,1,MPI_C_BOOL,status.MPI_SOURCE,TAG_ADDANDINC_ACK,MPI_COMM_WORLD);
+
+    ack = false;
+    for (unsigned int i = 1; i<np; i++){
+        if((int) i != status.MPI_SOURCE){
+            MPI_Send(&ack,1,MPI_C_BOOL,i,TAG_ADDANDINC_ACK,MPI_COMM_WORLD);
+        }
+    }
+
+    unsigned int acks = 0;
+    while(acks < np-2){
+        MPI_Recv(NULL,0,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_ADDANDINC,MPI_COMM_WORLD,&status);
+        acks++;
+    }
 
     cout << "Agregado: " << key << endl;
 }
