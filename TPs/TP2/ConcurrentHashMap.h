@@ -29,5 +29,6 @@ class ConcurrentHashMap {
     //ConcurrentHashMap operator=(const ConcurrentHashMap& otro);
 
    private:
+    bool incrementar(string key,int index);
     int fHash(char x);
 };

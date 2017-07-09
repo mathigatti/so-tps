@@ -100,10 +100,10 @@ int main(void) {
 	        pthread_create(&pthrds[i], NULL, maximumAux, NULL);	    	
 	    }
     }
-    /** espero que terminen los threads de correr **/
+    // Espero que terminen los threads de correr.
     for(int i=0; i<PTHREADS_CORRIENDO_SIMULTANEAMENTE; i++)
         pthread_join(pthrds[i], NULL);
-    // Calculo el maximo y corroboro que sea gato con 200 apariciones
+    // Calculo el maximo y corroboro que sea gato con 200 apariciones.
     maximo = h_global.maximum(5);
     assert(maximo.first == "gato");
     assert(maximo.second == 200);

@@ -35,9 +35,12 @@ public:
 		atomic load if not.
 		*/
 		Nodo* nuevo_nodo = new Nodo(val);
-		Nodo* head = _head.load();
-	    nuevo_nodo->_next = head;
-	    while (!std::atomic_compare_exchange_weak(&_head, &head, nuevo_nodo));
+		Nodo* head;
+
+		do{
+			head = _head.load();
+		    nuevo_nodo->_next = head;
+	    } while (!std::atomic_compare_exchange_weak(&_head, &head, nuevo_nodo));
 	}
 
 	T& front() const {

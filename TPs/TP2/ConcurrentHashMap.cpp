@@ -32,13 +32,13 @@ string iesimo(list<string>archs, int iesimo){
     return "";
 }
 
-void* count_words_aux(void* data){
+void* count_words_ej3_void(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     ConcurrentHashMap::count_words(words_data->file,words_data->h);
-    pthread_exit(NULL); 
+    pthread_exit(NULL);
 }
 
-void* count_words_aux2(void* data){
+void* count_words_ej4_void(void* data){
     Count_words_data* words_data = (Count_words_data*) data;
     int size = (words_data->archs).size();
     std::atomic_uint* next_available = words_data->next_available;
@@ -152,7 +152,7 @@ ConcurrentHashMap ConcurrentHashMap::count_words_ej3(list<string>archs){
     for (auto it = archs.begin(); it != archs.end(); ++it){
         data[i].h = &h;
         data[i].file = *it;
-        pthread_create(&pthrds[i], NULL, count_words_aux, &data[i]);
+        pthread_create(&pthrds[i], NULL, count_words_ej3_void, &data[i]);
         i++;
     }
     for(int t=0; t<size; t++){
@@ -178,7 +178,7 @@ list<string>archs){
 
     int i = 0;
     for (auto it = archs.begin(); i < n && it != archs.end(); ++it){
-        pthread_create(&pthrds[i], NULL, count_words_aux2, &data);
+        pthread_create(&pthrds[i], NULL, count_words_ej4_void, &data);
         i++;
     }
 
@@ -299,9 +299,24 @@ deberá haber locking a nivel de cada elemento del array.
 void ConcurrentHashMap::addAndInc(string key){    
     /** obtenemos acceso a la lista correspondiente y la lockeamos **/
     int index = fHash(key[0]);
+
     locks_lista[index].lock();
     
     /** agregamos o incrementamos segun corresponda **/
+    bool pertenece = incrementar(key, index);
+
+    if(!pertenece){
+        pair<string, unsigned int> value = make_pair(key,1);
+        tabla[index]->push_front(value);
+    }
+
+    /** habilitamos acceso a la lista para otros threads que hagan addAndInc() **/
+    locks_lista[index].unlock();
+
+
+}
+
+bool ConcurrentHashMap::incrementar(string key,int index){
     bool pertenece = false;
     for (auto it = tabla[index]->CrearIt(); it.HaySiguiente(); it.Avanzar()) {
         pair<string, unsigned int>& t = it.Siguiente();
@@ -310,14 +325,7 @@ void ConcurrentHashMap::addAndInc(string key){
             pertenece = true;
         }
     }
-
-    if(!pertenece){
-        pair<string, unsigned int> value = make_pair(key,1);
-        tabla[index]->push_front(value);
-    }
-    /** habilitamos acceso a la lista para otros threads que hagan addAndInc() **/
-    locks_lista[index].unlock();
-
+    return pertenece;
 }
 
 /*

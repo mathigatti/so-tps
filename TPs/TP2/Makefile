@@ -6,7 +6,7 @@ CXX = g++
 CXXFLAGS = -std=c++11
 LDLIBS = -lpthread
 
-BIN = test-1 test-2 test-3 test-4 test-5 test-6 test-z tiempos tiempos1 tiempos2 tiempos3
+BIN = test-1 test-2 test-2-mini test-3 test-3-mini test-4 test-4-mini test-5-mini test-5 test-6 test-z tiempos tiempos1 tiempos2 tiempos3
 OBJ = ConcurrentHashMap.o locks/Mutex.o
 
 all: $(BIN)
@@ -140,4 +140,5 @@ generar-palabras-2-run: ./generarPalabras2
 clean:
 	rm -f $(BIN) $(OBJ)
 	rm -f corpus-*
+	rm -f resultado*
 
