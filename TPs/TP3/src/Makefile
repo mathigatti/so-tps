@@ -16,7 +16,7 @@ dist_hashmap: $(SRCS)
 
 test-1: dist_hashmap
 	awk -f corpus.awk corpus | sort >corpus-post
-	cat test-1.txt | mpiexec -np 10 ./dist_hashmap | sort | diff -u - corpus-post
+	cat TXTs/test-1.txt | mpiexec -np 10 ./dist_hashmap | sort | diff -u - corpus-post
 	rm -f corpus-post
 
 clean:
