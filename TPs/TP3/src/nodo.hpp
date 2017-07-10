@@ -22,6 +22,7 @@ using namespace std;
 #define TAG_MAXIMUM_WORD 5
 #define TAG_MAXIMUM_END 6
 #define TAG_ADDANDINC_ACK 7
+#define TAG_LOAD_FIN 8
 
 #define CONSOLE_RANK 0
 
@@ -35,7 +36,7 @@ void nodo(unsigned int rank);
 void trabajarArduamente();
 
 bool nodeQuit();
-bool nodeLoad(char msg[], HashMap &h);
+bool nodeLoad(HashMap &h);
 bool nodeMaximum(HashMap &h);
 bool nodeMember(char msg[], HashMap &h);
 bool nodeAddAndInc(char msg[], HashMap &h);

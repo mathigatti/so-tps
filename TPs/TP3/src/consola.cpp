@@ -24,16 +24,29 @@ static unsigned int np;
 
 // Crea un ConcurrentHashMap distribuido
 static void load(list<string> params) {
-    char msg[BUFFER_SIZE];
 
-    int i = 0;
-    for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
-        strcpy(msg, (*it).c_str());
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i%(np-1)+1,TAG_LOAD,MPI_COMM_WORLD);
-        i++;
+    char msg[BUFFER_SIZE];
+    for (unsigned int i = 1; i<np; i++){
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_LOAD,MPI_COMM_WORLD);
     }
 
-    cout << "La lista esta procesada" << endl;
+    MPI_Status status;   // required variable for receive routines
+    for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
+        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
+
+        strcpy(msg, (*it).c_str());
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD);
+    }
+
+    unsigned int acks = 0;
+    while(acks < np-1){
+        //Espero a cada nodo
+        MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
+        //Le aviso que ya terminamos
+        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD_FIN,MPI_COMM_WORLD);
+        acks++;
+    }
+    //cout << "La lista esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
@@ -75,8 +88,6 @@ static void maximum() {
 
 // Esta función busca la existencia de *key* en algún nodo
 static void member(string key) {
-    bool esta = false;
-
     char msg[BUFFER_SIZE];
     strcpy(msg, (key).c_str());
 
@@ -87,15 +98,23 @@ static void member(string key) {
     unsigned int acks = 0;
     MPI_Status status;   // required variable for receive routines
 
-    bool res = false;
-
-    while(acks < np-1){
+    bool esta = false;
+    while(!esta && acks < np-1){
         MPI_Recv(&esta,1,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_MEMBER,MPI_COMM_WORLD,&status);
-        if(esta) res = esta;
+        if(esta)
+            cout << "El string <" << key << "> está." << endl;
         acks++;
     }
 
-    cout << "El string <" << key << (res ? ">" : "> no") << " está" << endl;
+    if(!esta)
+        cout << "El string <" << key << "> no está." << endl;
+
+    // Espero que contesten los que faltan para que no queden mensajes colgados
+    while(acks < np-1){
+        MPI_Recv(&esta,1,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_MEMBER,MPI_COMM_WORLD,&status);
+        acks++;
+    }
+
     
 }
 
@@ -166,7 +185,7 @@ static bool procesar_comandos() {
         strncmp(first_param, CMD_SQUIT, sizeof(CMD_SQUIT))==0) {
 
         quit();
-        printf("Adios!\n");
+        //printf("Adios!\n");
         return true;
     }
 
@@ -218,16 +237,16 @@ static bool procesar_comandos() {
 
 void consola(unsigned int np_param) {
     np = np_param;
-    printf("Comandos disponibles:\n");
-    printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");
-    printf("  "CMD_ADD" <string>\n");
-    printf("  "CMD_MEMBER" <string>\n");
-    printf("  "CMD_MAXIMUM"\n");
-    printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
+    // printf("Comandos disponibles:\n");
+    // printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");
+    // printf("  "CMD_ADD" <string>\n");
+    // printf("  "CMD_MEMBER" <string>\n");
+    // printf("  "CMD_MAXIMUM"\n");
+    // printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
 
     bool fin = false;
     while (!fin) {
-        printf("> ");
+        //printf("> ");
         fflush(stdout);
         fin = procesar_comandos();
     }

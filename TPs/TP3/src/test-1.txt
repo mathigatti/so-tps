@@ -1,0 +1,2 @@
+load corpus
+q

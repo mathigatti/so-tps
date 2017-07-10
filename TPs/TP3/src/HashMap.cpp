@@ -121,7 +121,7 @@ void HashMap::printAll() const {
             it != bucket.end();
             ++it)
         {
-            cout << "<" << (*it).first << "," << (*it).second << ">" << endl;
+            cout << (*it).first << " " << (*it).second << endl;
         }
     }
 }

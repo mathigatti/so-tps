@@ -3,10 +3,8 @@
 using namespace std;
 
 void nodo(unsigned int rank) {
-    printf("Soy un nodo. Mi rank es %d \n", rank);
+    //printf("Soy un nodo. Mi rank es %d \n", rank);
 
-    // TODO: Implementar
-    // Creo un HashMap local
     HashMap h;
     MPI_Status status;   // required variable for receive routines
 
@@ -19,7 +17,7 @@ void nodo(unsigned int rank) {
 	    		fin = nodeQuit();
 				break;
 			case TAG_LOAD:
-				fin = nodeLoad(msg, h);
+				fin = nodeLoad(h);
 				break;
             case TAG_MAXIMUM:
                 fin = nodeMaximum(h);
@@ -44,14 +42,30 @@ bool nodeQuit(){
 	return true;
 }
 
-bool nodeLoad(char msg[], HashMap &h){
-    string str(msg);
-    h.load(str);
-    h.printAll();
+bool nodeLoad(HashMap &h){
+    char msg[BUFFER_SIZE];
+    MPI_Status status;   // required variable for receive routines
+
+    bool termine = false;
+
+    while(!termine){
+        // Aviso que estoy listo para cargar las palabras
+        MPI_Send(NULL,0,MPI_CHAR,0,TAG_LOAD,MPI_COMM_WORLD);
+        // Espero que me pasen el archivo a cargar o me avisen que terminamos
+        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,0,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+
+        if(status.MPI_TAG != TAG_LOAD_FIN){
+            string str(msg);
+            h.load(str);
+            h.printAll();
+        } else{
+            termine = true;
+        }
+    }
+
     return false;
 }
 
-// Esta mal, deberia devolver la palabra maxima entre todos los HashMaps mergeados
 bool nodeMaximum(HashMap &h){
     HashMap::iterator it = h.begin();
 
