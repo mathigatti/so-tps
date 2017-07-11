@@ -1,0 +1,3 @@
+load test-words/perro.txt test-words/perro.txt test-words/perro.txt test-words/perro.txt test-words/perro.txt test-words/perro.txt
+maximum
+q

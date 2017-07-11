@@ -1,0 +1,2 @@
+El string <oveja> está.
+El string <perro> no está.

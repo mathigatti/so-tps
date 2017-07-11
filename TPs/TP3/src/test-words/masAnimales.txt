@@ -28,15 +28,4 @@ caballo
 oveja
 gato
 caballo
-oveja
-gato
-caballo
-oveja
-gato
-caballo
-oveja
-gato
-caballo
-oveja
-gato
 caballo

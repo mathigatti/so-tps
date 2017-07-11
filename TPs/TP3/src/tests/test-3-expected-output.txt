@@ -1,0 +1,2 @@
+El máximo es <caballo,11>
+El máximo es <oveja,12>

@@ -1,0 +1,8 @@
+load test-words/masAnimales.txt
+maximum
+addAndInc oveja
+addAndInc oveja
+maximum
+member oveja
+member perro
+q
