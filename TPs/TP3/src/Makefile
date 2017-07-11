@@ -59,6 +59,6 @@ test-4: dist_hashmap
 
 clean:
 	rm -f $(BIN)
-	rm tail
+	rm -f tail
 
 new: clean all
