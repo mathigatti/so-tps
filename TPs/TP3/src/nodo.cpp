@@ -29,13 +29,12 @@ void nodo(unsigned int rank) {
                 fin = nodeAddAndInc(msg,h);
                 break;
     	}
-		trabajarArduamente();
     }
 }
 
 void trabajarArduamente() {
-    //int r = rand() % 2500000 + 500000;
-    //usleep(r);
+    int r = rand() % 2500000 + 500000;
+    usleep(r);
 }
 
 bool nodeQuit(){
@@ -50,6 +49,7 @@ bool nodeLoad(HashMap &h){
 
     while(!termine){
         // Aviso que estoy listo para cargar las palabras
+        trabajarArduamente();
         MPI_Send(NULL,0,MPI_CHAR,0,TAG_LOAD,MPI_COMM_WORLD);
         // Espero que me pasen el archivo a cargar o me avisen que terminamos
         MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,0,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
@@ -85,12 +85,14 @@ bool nodeMaximum(HashMap &h){
 bool nodeMember(char msg[], HashMap &h){
     string str(msg);
     bool esta = h.member(str);
+    trabajarArduamente();
     MPI_Send(&esta,1,MPI_C_BOOL,CONSOLE_RANK,TAG_MEMBER,MPI_COMM_WORLD);
     return false;
 }
 
 bool nodeAddAndInc(char msg[], HashMap &h){
     string str(msg);
+    trabajarArduamente();
     MPI_Send(NULL,0,MPI_C_BOOL,CONSOLE_RANK,TAG_ADDANDINC,MPI_COMM_WORLD);
  
     bool ack;

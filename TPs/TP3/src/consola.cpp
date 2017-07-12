@@ -32,11 +32,13 @@ static void load(list<string> params) {
 
     MPI_Status status;   // required variable for receive routines
     for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
-        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
+        MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
 
         strcpy(msg, (*it).c_str());
         MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD);
     }
+    
+    //cout << "La lista esta procesada" << endl;
 
     unsigned int acks = 0;
     while(acks < np-1){
@@ -46,7 +48,7 @@ static void load(list<string> params) {
         MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD_FIN,MPI_COMM_WORLD);
         acks++;
     }
-    //cout << "La lista esta procesada" << endl;
+
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
@@ -134,6 +136,8 @@ static void addAndInc(string key) {
     bool ack = true;
     MPI_Send(&ack,1,MPI_C_BOOL,status.MPI_SOURCE,TAG_ADDANDINC_ACK,MPI_COMM_WORLD);
 
+    cout << "Agregado: " << key << endl;
+
     ack = false;
     for (unsigned int i = 1; i<np; i++){
         if((int) i != status.MPI_SOURCE){
@@ -147,7 +151,6 @@ static void addAndInc(string key) {
         acks++;
     }
 
-    cout << "Agregado: " << key << endl;
 }
 
 
