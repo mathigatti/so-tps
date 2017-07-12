@@ -26,7 +26,7 @@ test: .SILENT
 	$(MAKE) test-1
 	echo "\t\tTest finalizado con EXITO :)"
 
-	echo "2. Cargo un archivo con palabras 2500 palabras (Algunas repetidas) a 10 nodos. Chequeo que se carguen correctamente. (Test extraido del TP2)"
+	echo "2. Cargo un archivo con 2500 palabras (Algunas repetidas) a 10 nodos. Chequeo que se carguen correctamente. (Test extraido del TP2)"
 	$(MAKE) test-2
 	echo "\tTest finalizado con EXITO :)"
 
