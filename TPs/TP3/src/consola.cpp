@@ -26,8 +26,9 @@ static unsigned int np;
 static void load(list<string> params) {
 
     char msg[BUFFER_SIZE];
-    for (unsigned int i = 1; i<np; i++){
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_LOAD,MPI_COMM_WORLD);
+    MPI_Request request;
+    for (unsigned int i = 1; i<np ; i++){
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_LOAD, MPI_COMM_WORLD, &request);
     }
 
     MPI_Status status;   // required variable for receive routines
@@ -54,8 +55,9 @@ static void load(list<string> params) {
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
     char msg[BUFFER_SIZE];
+    MPI_Request request;
     for (unsigned int i = 1; i<np ; i++){
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_QUIT,MPI_COMM_WORLD);
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_QUIT, MPI_COMM_WORLD, &request);
     }
 }
 
@@ -65,8 +67,9 @@ static void maximum() {
     HashMap h;
 
     char msg[BUFFER_SIZE];
-    for (unsigned int i = 1; i<np; i++){
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_MAXIMUM,MPI_COMM_WORLD);
+    MPI_Request request;
+    for (unsigned int i = 1; i<np ; i++){
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_MAXIMUM, MPI_COMM_WORLD, &request);
     }
 
     MPI_Status status;   // required variable for receive routines
@@ -92,9 +95,9 @@ static void maximum() {
 static void member(string key) {
     char msg[BUFFER_SIZE];
     strcpy(msg, (key).c_str());
-
-    for (unsigned int i = 1; i<np; i++){
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_MEMBER,MPI_COMM_WORLD);
+    MPI_Request request;
+    for (unsigned int i = 1; i<np ; i++){
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_MEMBER, MPI_COMM_WORLD, &request);
     }
 
     unsigned int acks = 0;
@@ -126,8 +129,9 @@ static void addAndInc(string key) {
     char msg[BUFFER_SIZE];
     strcpy(msg, (key).c_str());
 
-    for (unsigned int i = 1; i<np; i++){
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,i,TAG_ADDANDINC,MPI_COMM_WORLD);
+    MPI_Request request;
+    for (unsigned int i = 1; i<np ; i++){
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_ADDANDINC, MPI_COMM_WORLD, &request);
     }
 
     MPI_Status status;   // required variable for receive routines

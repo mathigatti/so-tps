@@ -33,8 +33,8 @@ void nodo(unsigned int rank) {
 }
 
 void trabajarArduamente() {
-    int r = rand() % 2500000 + 500000;
-    usleep(r);
+    //int r = rand() % 2500000 + 500000;
+    //usleep(r);
 }
 
 bool nodeQuit(){
