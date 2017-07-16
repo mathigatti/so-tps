@@ -50,7 +50,9 @@ bool nodeLoad(HashMap &h){
     while(!termine){
         // Aviso que estoy listo para cargar las palabras
         trabajarArduamente();
-        MPI_Send(NULL,0,MPI_CHAR,0,TAG_LOAD,MPI_COMM_WORLD);
+
+        MPI_Request request;
+        MPI_Isend(NULL,0,MPI_CHAR,0,TAG_LOAD,MPI_COMM_WORLD, &request);
         // Espero que me pasen el archivo a cargar o me avisen que terminamos
         MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,0,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 
@@ -70,14 +72,15 @@ bool nodeMaximum(HashMap &h){
     HashMap::iterator it = h.begin();
 
     char msg[BUFFER_SIZE];
+    MPI_Request request;
 
     while(it != h.end()){
         strcpy(msg, (*it).c_str());
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_WORD,MPI_COMM_WORLD);
+        MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_WORD,MPI_COMM_WORLD, &request);
         it++;
     }
     trabajarArduamente();
-    MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_END,MPI_COMM_WORLD);
+    MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,TAG_MAXIMUM_END,MPI_COMM_WORLD, &request);
     
     return false;
 }
@@ -85,15 +88,18 @@ bool nodeMaximum(HashMap &h){
 bool nodeMember(char msg[], HashMap &h){
     string str(msg);
     bool esta = h.member(str);
+    MPI_Request request;
     trabajarArduamente();
-    MPI_Send(&esta,1,MPI_C_BOOL,CONSOLE_RANK,TAG_MEMBER,MPI_COMM_WORLD);
+    MPI_Isend(&esta,1,MPI_C_BOOL,CONSOLE_RANK,TAG_MEMBER,MPI_COMM_WORLD, &request);
     return false;
 }
 
 bool nodeAddAndInc(char msg[], HashMap &h){
     string str(msg);
+    MPI_Request request;
+
     trabajarArduamente();
-    MPI_Send(NULL,0,MPI_C_BOOL,CONSOLE_RANK,TAG_ADDANDINC,MPI_COMM_WORLD);
+    MPI_Isend(NULL,0,MPI_C_BOOL,CONSOLE_RANK,TAG_ADDANDINC,MPI_COMM_WORLD, &request);
  
     bool ack;
     MPI_Status status;   // required variable for receive routines

@@ -36,7 +36,7 @@ static void load(list<string> params) {
         MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
 
         strcpy(msg, (*it).c_str());
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD);
+        MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD, &request);
     }
     
     //cout << "La lista esta procesada" << endl;
@@ -46,7 +46,7 @@ static void load(list<string> params) {
         //Espero a cada nodo
         MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
         //Le aviso que ya terminamos
-        MPI_Send(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD_FIN,MPI_COMM_WORLD);
+        MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD_FIN,MPI_COMM_WORLD, &request);
         acks++;
     }
 
@@ -138,14 +138,14 @@ static void addAndInc(string key) {
     MPI_Recv(NULL,0,MPI_C_BOOL,MPI_ANY_SOURCE,TAG_ADDANDINC,MPI_COMM_WORLD,&status);
 
     bool ack = true;
-    MPI_Send(&ack,1,MPI_C_BOOL,status.MPI_SOURCE,TAG_ADDANDINC_ACK,MPI_COMM_WORLD);
+    MPI_Isend(&ack,1,MPI_C_BOOL,status.MPI_SOURCE,TAG_ADDANDINC_ACK,MPI_COMM_WORLD, &request);
 
     cout << "Agregado: " << key << endl;
 
     ack = false;
     for (unsigned int i = 1; i<np; i++){
         if((int) i != status.MPI_SOURCE){
-            MPI_Send(&ack,1,MPI_C_BOOL,i,TAG_ADDANDINC_ACK,MPI_COMM_WORLD);
+            MPI_Isend(&ack,1,MPI_C_BOOL,i,TAG_ADDANDINC_ACK,MPI_COMM_WORLD, &request);
         }
     }
 
