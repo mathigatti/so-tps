@@ -51,16 +51,20 @@ bool nodeLoad(char msg[BUFFER_SIZE], HashMap &h){
     MPI_Request request;
 
     bool termine = false;
+
+    char msgRecv[BUFFER_SIZE];
+
+
     while(!termine){
         // Aviso que estoy listo para cargar mas palabras
         trabajarArduamente();
         MPI_Isend(NULL,0,MPI_CHAR,CONSOLE_RANK,TAG_LOAD,MPI_COMM_WORLD, &request);
 
         // Espero que me pasen el archivo a cargar o me avisen que terminamos
-        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        MPI_Recv(&msgRecv,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 
         if(status.MPI_TAG != TAG_LOAD_FIN){
-            string str(msg);
+            string str(msgRecv);
             h.load(str);
             h.printAll();
         } else {
