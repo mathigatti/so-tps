@@ -36,7 +36,7 @@ void nodo(unsigned int rank);
 void trabajarArduamente();
 
 bool nodeQuit();
-bool nodeLoad(HashMap &h);
+bool nodeLoad(char msg[BUFFER_SIZE], HashMap &h);
 bool nodeMaximum(HashMap &h);
 bool nodeMember(char msg[], HashMap &h);
 bool nodeAddAndInc(char msg[], HashMap &h);

@@ -27,29 +27,36 @@ static void load(list<string> params) {
 
     char msg[BUFFER_SIZE];
     MPI_Request request;
-    for (unsigned int i = 1; i<np ; i++){
-        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, i, TAG_LOAD, MPI_COMM_WORLD, &request);
-    }
-
     MPI_Status status;   // required variable for receive routines
-    for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
-        MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
 
+    unsigned int firstLoad = 1;
+    list<string>::iterator it=params.begin();
+    // Primera corrida, la hago de forma deterministica
+    while(it != params.end() && firstLoad < np){
         strcpy(msg, (*it).c_str());
-        MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD, &request);
+        MPI_Isend(&msg, BUFFER_SIZE, MPI_CHAR, firstLoad, TAG_LOAD, MPI_COMM_WORLD, &request);
+        firstLoad++;
+        ++it;
     }
-    
+
+    if(it != params.end()){
+        while( it != params.end()) {
+            MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
+            strcpy(msg, (*it).c_str());
+            MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD,MPI_COMM_WORLD, &request);
+            ++it;
+        }
+    }
     //cout << "La lista esta procesada" << endl;
 
     unsigned int acks = 0;
-    while(acks < np-1){
+    while(acks < firstLoad-1){
         //Espero a cada nodo
         MPI_Recv(NULL,0,MPI_CHAR,MPI_ANY_SOURCE,TAG_LOAD,MPI_COMM_WORLD,&status);
         //Le aviso que ya terminamos
         MPI_Isend(&msg,BUFFER_SIZE,MPI_CHAR,status.MPI_SOURCE,TAG_LOAD_FIN,MPI_COMM_WORLD, &request);
         acks++;
     }
-
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar

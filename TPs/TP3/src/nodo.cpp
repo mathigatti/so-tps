@@ -17,16 +17,16 @@ void nodo(unsigned int rank) {
 	    		fin = nodeQuit();
 				break;
 			case TAG_LOAD:
-				fin = nodeLoad(h);
+				fin = nodeLoad(msg, h);
 				break;
             case TAG_MAXIMUM:
                 fin = nodeMaximum(h);
                 break;
             case TAG_MEMBER:
-                fin = nodeMember(msg,h);
+                fin = nodeMember(msg, h);
                 break;
             case TAG_ADDANDINC:
-                fin = nodeAddAndInc(msg,h);
+                fin = nodeAddAndInc(msg, h);
                 break;
     	}
     }
@@ -41,26 +41,29 @@ bool nodeQuit(){
 	return true;
 }
 
-bool nodeLoad(HashMap &h){
-    char msg[BUFFER_SIZE];
+bool nodeLoad(char msg[BUFFER_SIZE], HashMap &h){
+
+    string str(msg);
+    h.load(str);
+    h.printAll();
+
     MPI_Status status;   // required variable for receive routines
+    MPI_Request request;
 
     bool termine = false;
-
     while(!termine){
-        // Aviso que estoy listo para cargar las palabras
+        // Aviso que estoy listo para cargar mas palabras
         trabajarArduamente();
+        MPI_Isend(NULL,0,MPI_CHAR,CONSOLE_RANK,TAG_LOAD,MPI_COMM_WORLD, &request);
 
-        MPI_Request request;
-        MPI_Isend(NULL,0,MPI_CHAR,0,TAG_LOAD,MPI_COMM_WORLD, &request);
         // Espero que me pasen el archivo a cargar o me avisen que terminamos
-        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,0,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+        MPI_Recv(&msg,BUFFER_SIZE,MPI_CHAR,CONSOLE_RANK,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 
         if(status.MPI_TAG != TAG_LOAD_FIN){
             string str(msg);
             h.load(str);
             h.printAll();
-        } else{
+        } else {
             termine = true;
         }
     }
